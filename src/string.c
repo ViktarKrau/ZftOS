@@ -1,10 +1,17 @@
 #include "string.h"
 #include "zft_memory.h"
 
-#define BOOL uint8_t
-#define TRUE 0xFF
-#define FALSE 0x00
 
+BOOL is_empty(const char* string){
+	char* stringptr = (char*)string;
+	while(*stringptr){
+		if(*stringptr != ' ' && *stringptr != '\n' && *stringptr != '\t' && *stringptr != '\n'){
+			return FALSE;
+		}
+		stringptr++;
+	}
+	return TRUE;
+}
 size_t strlen(const char* string){
 	size_t retval = 0;
 	while(string[retval++]);
@@ -13,10 +20,7 @@ size_t strlen(const char* string){
 
 uint8_t strcmp(const char* string_a, const char* string_b){
 	size_t i;
-	for(i = 0; string_a[i] && string_b[i]; ++i);
-	if(string_a[i] > string_b[i]){
-		return string_a[i] - string_b[i];
-	}
+	for(i = 0; string_a[i] && string_b[i] && string_a[i] == string_b[i]; ++i);
 	return string_b[i] - string_a[i];
 }
 
@@ -25,28 +29,7 @@ char* strcpy(char* destination, const char* source){
 	return destination;
 }
 
-char* int_to_string(int64_t value, char* buffer, uint8_t base){
-	BOOL sign = (value < 0);
-	size_t string_iterator;
-	if(sign)
-		value = -value;
-	string_iterator = 0;
-	char temp;
-	do{
-		temp = value % base;
-		if(temp <= 9){
-			temp += '0';
-		}
-		else{
-			temp += 'a';
-		}
-		buffer[string_iterator++] = temp;
-	} while ((value /= 10) > 0);
-	if(sign)
-		buffer[string_iterator++] = '-';
-	buffer[string_iterator] = '\0';
-	return reverse(buffer);
-}
+
 
 char* reverse(char* string){
     size_t i, j;
@@ -65,21 +48,44 @@ char* uint_to_string(uint64_t value, char* buffer, uint8_t base){
 	char temp;
 	do{
 		temp = value % base;
-		if(temp < 9){
+		if(temp <= 9){
 			temp += '0';
 		}
 		else{
-			temp += 'a';
+			temp += 'a' - 10;
 		}
 		buffer[string_iterator++] = temp;
-	} while ((value /= 10) > 0);
+	} while ((value /= base) > 0);
 	buffer[string_iterator] = '\0';
 	return reverse(buffer);
 }
-char* sprintf(char* destination, const char* format, ...){
+char* int_to_string(int64_t value, char* buffer, uint8_t base){
+	BOOL sign = (value < 0);
+	size_t string_iterator;
+	if(sign)
+		value = -value;
+	string_iterator = 0;
+	char temp;
+	do{
+		temp = value % base;
+		if(temp <= 9){
+			temp += '0';
+		}
+		else{
+			temp += 'a' - 10;
+		}
+		buffer[string_iterator++] = temp;
+	} while ((value /= base) > 0);
+	if(sign)
+		buffer[string_iterator++] = '-';
+	buffer[string_iterator] = '\0';
+	return reverse(buffer);
+}
+
+/*char* sprintf(char* destination, const char* format, ...){
 	const char** stack_ptr = &format;
 	stack_ptr++;
 	return vsprintf(destination, format, (void*)stack_ptr);
-}
+}*/
 //TODO
-char* vsprintf(char* destination, const char* format, void* args){return destination, format, args, NULL;}
+//char* vsprintf(char* destination, const char* format, void* args){return destination, format, args, NULL;}

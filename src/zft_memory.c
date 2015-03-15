@@ -1,6 +1,6 @@
 #include "zft_memory.h"
-
-void memcpy(void* destination, const void* source, size_t length){
+#include "zftdef.h"
+void* memcpy(void* destination, const void* source, size_t length){
 	int8_t* byte_dest_ptr = (int8_t*)destination;
 	int8_t* byte_source_ptr = (int8_t*)source;
 	for(size_t i = 0; i < length; ++i){
@@ -8,8 +8,9 @@ void memcpy(void* destination, const void* source, size_t length){
 		byte_source_ptr++;
 		byte_dest_ptr++; 
 	}
+	return destination;
 }
-void memduplicate(void* destination, const void* source, size_t source_length, size_t times){
+void* memduplicate(void* destination, const void* source, size_t source_length, size_t times){
 	int8_t* byte_dest_ptr = (int8_t*)destination;
 	int8_t* byte_source_ptr = (int8_t*)source;
 	int8_t* temp_byte_source_ptr = byte_source_ptr;
@@ -21,4 +22,12 @@ void memduplicate(void* destination, const void* source, size_t source_length, s
 		}
 		temp_byte_source_ptr = byte_source_ptr;
 	}
+	return destination;
+}
+void* memzero(void* destination, size_t length){
+	int8_t* byte_dest_ptr = (int8_t*)destination;
+	for (size_t i = 0; i < length; ++i){
+		byte_dest_ptr[i] = 0;
+	}
+	return destination;
 }
