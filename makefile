@@ -13,7 +13,7 @@ boot:
 idt:
 	$(ASM) src/idt.s -o obj/idt.o
 
-cppcompile: interrupts main kernel enterqueue inputstream terminal memory string shell
+cppcompile: new interrupts main kernel enterqueue inputstream terminal memory string shell time
 main:
 	$(GPP) -c src/main.c++ -o obj/main.o $(PFLAGS)
 kernel:
@@ -32,10 +32,13 @@ interrupts:
 	$(GPP) -c src/interrupts.c -o obj/interrupts.o $(PFLAGS)
 shell:
 	$(GPP) -c src/shell.c++ -o obj/shell.o $(PFLAGS)
-
+time:
+	$(GPP) -c src/time.c++ -o obj/time.o $(PFLAGS)
+new:
+	$(GPP) -c src/new.c++ -o obj/new.o $(PFLAGS)
 
 link:
-	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/inputstream.o obj/enterqueue.o obj/idt.o -lgcc
+	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/inputstream.o obj/enterqueue.o obj/idt.o -lgcc
 
 
 

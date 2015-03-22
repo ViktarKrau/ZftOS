@@ -1,4 +1,4 @@
-#include "inputstream.h++"
+#include "inputstream.h"
 #include "kbmap.h"
 uint8_t InputStream::getkey(){
 	char keycode = 0;
@@ -11,6 +11,7 @@ uint8_t InputStream::getkey_nolock(){
 	return EnterQueue::pop();
 }
 char InputStream::getchar(){
+	
 	int16_t code;
 	while(true){
 		code = getkey();

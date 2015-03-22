@@ -1,7 +1,7 @@
 #include "zftdef.h"
 #include "interrupts.h"
 #include "iob.h"
-#include "enterqueue.h++"
+#include "enterqueue.h"
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
@@ -37,11 +37,11 @@ void init_idt(){
 	uint32_t idt_ptr[2];
 	
 	keyboard_address = (uint32_t)keyboard_handler;
-	IDT[0x21].offset_lowerbits = keyboard_address & 0xffff;
+	IDT[0x21].offset_lowerbits = (uint16_t) (keyboard_address & 0xffff);
 	IDT[0x21].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
 	IDT[0x21].zero = 0;
 	IDT[0x21].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[0x21].offset_higherbits = (keyboard_address & 0xffff0000) >> 16;
+	IDT[0x21].offset_higherbits = (uint16_t) ((keyboard_address & 0xffff0000) >> 16);
 	
 
 	/*     Ports
@@ -74,11 +74,16 @@ void init_idt(){
 	/* mask interrupts */
 	outb(0x21 , 0xff);
 	outb(0xA1 , 0xff);
-
+	/*struct Idt_ptr
+	{
+		uint16_t limit;
+		uint32_t base;
+	} __attribute__((packed));
+	struct Idt_ptr idt_ptr;*/
 	/* fill the IDT descriptor */
-	idt_address = (uint32_t)IDT ;
-	idt_ptr[0] = (sizeof (struct IDTDescr) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
-	idt_ptr[1] = idt_address >> 16 ;
+	idt_address = (uint32_t)&IDT;
+	idt_ptr[0] = (uint32_t) ((sizeof (struct IDTDescr) * IDT_SIZE) + ((idt_address & 0xffff) << 16));
+	idt_ptr[1] = idt_address >> 16;
 	load_idt(idt_ptr);
 }
 extern "C"

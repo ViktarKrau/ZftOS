@@ -1,5 +1,7 @@
-#include "terminal.h++"
+#include "terminal.h"
 #include "iob.h"
+#include "zft_memory.h"
+#include "string.h"
 Terminal::Terminal(){
 	setColor(COLOR_WHITE, COLOR_BLACK);
 	init();

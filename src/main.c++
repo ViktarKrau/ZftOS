@@ -1,13 +1,15 @@
 #include <multiboot.h>
-#include "kernel.h++"
+#include "kernel.h"
 #include "zftdef.h"
 #include "string.h"
 #include "zft_memory.h"
-#include "terminal.h++"
 #include "interrupts.h"
+#include "time.h"
 void kernel_start(multiboot_info_t* info){
 	init_idt();
 	enable_kb();
+	Time::init();
+
 	Kernel kernel(info);
 	kernel.run();
 

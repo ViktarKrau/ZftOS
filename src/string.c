@@ -21,7 +21,7 @@ size_t strlen(const char* string){
 uint8_t strcmp(const char* string_a, const char* string_b){
 	size_t i;
 	for(i = 0; string_a[i] && string_b[i] && string_a[i] == string_b[i]; ++i);
-	return string_b[i] - string_a[i];
+	return (uint8_t) (string_b[i] - string_a[i]);
 }
 
 char* strcpy(char* destination, const char* source){
@@ -47,7 +47,7 @@ char* uint_to_string(uint64_t value, char* buffer, uint8_t base){
 	size_t string_iterator = 0;
 	char temp;
 	do{
-		temp = value % base;
+		temp = (char) (value % base);
 		if(temp <= 9){
 			temp += '0';
 		}
@@ -60,14 +60,14 @@ char* uint_to_string(uint64_t value, char* buffer, uint8_t base){
 	return reverse(buffer);
 }
 char* int_to_string(int64_t value, char* buffer, uint8_t base){
-	BOOL sign = (value < 0);
+	BOOL sign = (BOOL)(value < 0);
 	size_t string_iterator;
 	if(sign)
 		value = -value;
 	string_iterator = 0;
 	char temp;
 	do{
-		temp = value % base;
+		temp = (char) (value % base);
 		if(temp <= 9){
 			temp += '0';
 		}

@@ -1,8 +1,9 @@
-#include "kernel.h++"
+#include "kernel.h"
 #include "iob.h"
 #include "interrupts.h"
-#include "shell.h++"
-#include "iob.h"
+#include "shell.h"
+
+
 Terminal* Kernel::out;
 InputStream* Kernel::in;
 Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_BLUE, COLOR_LIGHT_GREY){
@@ -13,6 +14,10 @@ Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_BLUE, COLOR_LIGHT_GREY){
 }
 
 Kernel::~Kernel(){
+}
+void Kernel::cycleWait(uint64_t ticks) {
+	for(uint64_t i = 0; i < ticks; ++i){
+	}
 }
 void Kernel::exit(ExitType type){
 	if(type == REBOOT){
@@ -28,9 +33,8 @@ void Kernel::exit(ExitType type){
 		out->puts("\n\t\t\t\tSHUTDOWN....");
 	}
 }
-extern struct IDTDescr IDT[IDT_SIZE];
 void Kernel::run(){
-
+/*
 	out->putsln("0xB8000 is equal to ");
 	out->putbytes(0xB8000);
 	out->putsln("\nend of terminal is equal to");
@@ -54,7 +58,8 @@ void Kernel::run(){
 	out->puts("\nsizeof(int):  ");
 	out->putint(sizeof(int));
 	out->puts("\nsizeof(IDTDescr):   ");
-	out->putint(sizeof(IDTDescr));
+	out->putint(sizeof(IDTDescr));*/
+
 	Shell shell;
 	shell.run();
 	out->putsln("\n\n\nSHELL EXITED\n\n\n");
