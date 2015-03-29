@@ -1,8 +1,8 @@
 GCC=./compiler/bin/i686-elf-gcc
 GPP=./compiler/bin/i686-elf-g++
-PFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -pedantic
+PFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -pedantic -std=c++11
 ASM=./compiler/bin/i686-elf-as
-CFLAGS=-std=gnu99 -ffreestanding  -O2 -Wall -Wextra
+CFLAGS= -std=gnu99 -ffreestanding  -O2 -Wall -Wextra
 LFLAGS=-ffreestanding -O2 -nostdlib
 
 all: boot idt cppcompile link
@@ -13,7 +13,7 @@ boot:
 idt:
 	$(ASM) src/idt.s -o obj/idt.o
 
-cppcompile: new interrupts main kernel enterqueue inputstream terminal memory string shell time
+cppcompile: new memory interrupts main kernel enterqueue inputstream terminal zft_memory string shell time bitmap
 main:
 	$(GPP) -c src/main.c++ -o obj/main.o $(PFLAGS)
 kernel:
@@ -24,8 +24,10 @@ inputstream:
 	$(GPP) -c src/inputstream.c++ -o obj/inputstream.o $(PFLAGS)
 terminal:
 	$(GPP) -c src/terminal.c++ -o obj/terminal.o $(PFLAGS)
-memory:
+zft_memory:
 	$(GPP) -c src/zft_memory.c -o obj/zft_memory.o $(PFLAGS)
+memory:
+	$(GPP) -c src/memory.c++ -o obj/memory.o $(PFLAGS)
 string:
 	$(GPP) -c src/string.c -o obj/string.o $(PFLAGS)
 interrupts:
@@ -36,9 +38,12 @@ time:
 	$(GPP) -c src/time.c++ -o obj/time.o $(PFLAGS)
 new:
 	$(GPP) -c src/new.c++ -o obj/new.o $(PFLAGS)
+bitmap:
+	$(GPP) -c src/bitmap.c++ -o obj/bitmap.o $(PFLAGS)
+
 
 link:
-	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/inputstream.o obj/enterqueue.o obj/idt.o -lgcc
+	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/memory.o obj/inputstream.o obj/enterqueue.o obj/idt.o -lgcc
 
 
 

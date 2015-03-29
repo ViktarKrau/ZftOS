@@ -6,7 +6,9 @@
 
 Terminal* Kernel::out;
 InputStream* Kernel::in;
-Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_BLUE, COLOR_LIGHT_GREY){
+/*TODO replace color to BLUE*/
+
+Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_RED, COLOR_LIGHT_GREY){
 	out = &__out;
 	in = &__in;
 	memoryUpper = info->mem_upper;

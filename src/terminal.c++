@@ -57,7 +57,7 @@ void Terminal::newLine(){
 	else{
 		++row;
 	}
-} 
+}
 
 void Terminal::putColoredCharAtPos(char c, ColorByte _color, size_t x, size_t y){
 	*(startPtr + y * VGA_WIDTH + x) = makeColoredChar(c, _color);
@@ -141,13 +141,13 @@ void Terminal::scroll(){
 }
 
 uint16_t Terminal::makeColoredChar(char c){
-	uint16_t char16 = c;
+	uint16_t char16 = (uint16_t) c;
 	uint16_t color16 = color;
 	return char16 | color16 << 8;
 }
 
 uint16_t Terminal::makeColoredChar(char c, ColorByte _color){
-	uint16_t char16 = c;
+	uint16_t char16 = (uint16_t) c;
 	uint16_t color16 = _color;
 	return char16 | color16 << 8;
 }
@@ -160,7 +160,7 @@ void Terminal::putbytes(uint64_t value){
 	puts(" MB");
 }
 void Terminal::updateCursor(){
-    uint16_t position = (row * 80) + column;
+    uint16_t position = (uint16_t) ((row * 80) + column);
 	// cursor LOW port to vga INDEX register
 	outb(0x3D4, 0x0F);
 	outb(0x3D5, (uint8_t)(position & 0xFF));

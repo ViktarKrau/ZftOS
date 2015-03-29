@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "zftdef.h"
 
 #ifndef ENTER_QUEUE_H

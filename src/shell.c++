@@ -9,7 +9,8 @@ const char helptext[] = "\tZunft OS ver. 0.02\n"
 						"\t\treboot -- restart pc\n"
 						"\t\tcolor -- change output color\n"
 						"\t\tcowsay ... -- cow says what you want it to\n"
-						"\t\ttime -- get current time printed";
+						"\t\ttime -- get current time printed\n"
+						"\t\talloctest -- run test of allocation manager";
 
 Shell::Shell(){
 }
@@ -95,8 +96,41 @@ void Shell::run(){
 			printTime();
 			Kernel::out->putchar('\n');
 		}
+		else if (!strcmp(buff, "alloctest")) {
+			runMemTest();
+		}
 		else{
 			Kernel::out->puts("Command invalid");
 		}
 	}
+}
+
+void Shell::runMemTest() {
+	for(size_t i = 1; i < 100; ++i){
+
+		char* array = nullptr;
+		array = new char[i];
+		delete[] array;
+
+		uint64_t* array2 = nullptr;
+		array2 = new uint64_t[i];
+		delete []array2;
+
+		uint32_t* array3 = nullptr;
+		array3 = new uint32_t[i];
+		delete []array3;
+
+
+		uint8_t* singleValue = new uint8_t(1);
+		*singleValue = 0;
+
+		uint64_t val = (uint64_t) array;
+		Kernel::out->puts("\n");
+		Kernel::out->putuint(val);
+		if (!val || !array2 || !array3) {
+			Kernel::out->putsln("FAIL");
+			return;
+		}
+	}
+	Kernel::out->putsln("\nSUCCESS");
 }

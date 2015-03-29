@@ -11,6 +11,7 @@ public:
 	void printTime();
 	~Shell();
 private:
+	void runMemTest();
 	char buff[60];
 	void getCommand();
 };
