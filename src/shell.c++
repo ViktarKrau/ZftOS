@@ -1,6 +1,7 @@
 #include "shell.h"
 #include "string.h"
 #include "time.h"
+#include "speaker.h"
 
 const char helptext[] = "\tZunft OS ver. 0.02\n"
 						"\tList of supported commands\n"
@@ -10,42 +11,54 @@ const char helptext[] = "\tZunft OS ver. 0.02\n"
 						"\t\tcolor -- change output color\n"
 						"\t\tcowsay ... -- cow says what you want it to\n"
 						"\t\ttime -- get current time printed\n"
-						"\t\talloctest -- run test of allocation manager";
+						"\t\talloctest -- run test of allocation manager\n"
+						"\t\tbeep -- play default melody using system speaker\n"
+						"\t\tcalc -- calculate something\n"
+						"\t\tsetgmt -- setting current gmt";
 
-Shell::Shell(){
+Shell::Shell() {
 }
-Shell::~Shell(){
+
+
+
+Shell::~Shell() {
 }
-void Shell::getCommand(){
+
+
+
+void Shell::getCommand() {
 	Kernel::out->puts("\n > ");
 	size_t index = 0;
-	while(true){
+	while (true) {
 		char c = Kernel::in->getchar();
-		if(c == '\n'){
+		if (c == '\n') {
 			buff[index] = 0;
-			if(!is_empty(buff)){
+			if (!is_empty(buff)) {
 				Kernel::out->newLine();
 				return;
 			}
-			else{
+			else {
 				return getCommand();
 			}
 		}
-		else if(c == '\b'){
-			if(index){
+		else if (c == '\b') {
+			if (index) {
 				buff[index] = 0;
 				index--;
 				Kernel::out->putchar('\b');
 			}
 		}
-		else{
-			if(index < 59){
+		else {
+			if (index < 59) {
 				buff[index++] = c;
 				Kernel::out->putchar(c);
 			}
 		}
 	}
 }
+
+
+
 void Shell::printTime() {
 	Time time = Time::getCurrentTime();
 	Kernel::out->puts("Time: ");
@@ -62,36 +75,38 @@ void Shell::printTime() {
 	Kernel::out->putuint(time.second);
 
 }
-void Shell::run(){
+void Shell::run() {
 	Kernel::out->clear();
-
 	Kernel::out->putsln("                         WELCOME TO ZUNFT OS SHELL!"
 						"\nType \"help\" to get list of available commands");
 
+	Time::delay(1000);
 	printTime();
-	Kernel::out->putsln("");
+
+/*	Kernel::out->putsln("");
 	Kernel::out->putsln("\nstrcmp location");
 	Kernel::out->putbytes((uint64_t)strcmp);
 	Kernel::out->putsln("\nOut location");
 	Kernel::out->putbytes((uint64_t)Kernel::out);
 	Kernel::out->puts("\nIN:");
-	Kernel::out->putbytes((uint64_t)Kernel::in);
-	while(true){
+	Kernel::out->putbytes((uint64_t)Kernel::in);*/
+
+	while (true) {
 		getCommand();
-		if(!strcmp(buff, "help")){
+		if (!strcmp(buff, "help")) {
 			Kernel::out->putsln(helptext);
 		}
-		else if(!strcmp(buff, "exit")){
+		else if (!strcmp(buff, "exit")) {
 			Kernel::exit(Kernel::SHUTDOWN);
 		}
-		else if(!strcmp(buff, "reboot")){
+		else if (!strcmp(buff, "reboot")) {
 			Kernel::exit(Kernel::REBOOT);
 		}
-		else if(!strcmp(buff, "color")){
+		else if (!strcmp(buff, "color")) {
 			Kernel::out->setColor((ColorByte) (Kernel::out->getColor() + 1));
 			Kernel::out->redraw();
 		}
-		else if(!strcmp(buff, "time")){
+		else if (!strcmp(buff, "time")) {
 			Kernel::out->putchar('\n');
 			printTime();
 			Kernel::out->putchar('\n');
@@ -99,7 +114,19 @@ void Shell::run(){
 		else if (!strcmp(buff, "alloctest")) {
 			runMemTest();
 		}
-		else{
+		else if (!strcmp(buff, "setgmt")) {
+			setGMT();
+		}
+		else if (!strcmp(buff, "beep")) {
+			Speaker::playDefaultMelody();
+		}
+		else if (!strcmp(buff, "calc")) {
+			calc();
+		}
+		else if (!strcmp(buff, "cowsay")) {
+			cowsay();
+		}
+		else {
 			Kernel::out->puts("Command invalid");
 		}
 	}
@@ -127,10 +154,91 @@ void Shell::runMemTest() {
 		uint64_t val = (uint64_t) array;
 		Kernel::out->puts("\n");
 		Kernel::out->putuint(val);
-		if (!val || !array2 || !array3) {
+		if (array == nullptr || array2 == nullptr || array3 == nullptr) {
 			Kernel::out->putsln("FAIL");
 			return;
 		}
 	}
 	Kernel::out->putsln("\nSUCCESS");
+}
+
+
+
+void Shell::calc() {
+	char* tempBuffer = new char[15];
+
+	Kernel::in->get_word(tempBuffer, 15);
+	Kernel::out->putchar(' ');
+	int64_t operand0 = string_to_int(tempBuffer, 10);
+	Kernel::in->get_word(tempBuffer, 2);
+	Kernel::out->putchar(' ');
+	char sign = *tempBuffer;
+	Kernel::in->get_word(tempBuffer, 15);
+	Kernel::out->putchar(' ');
+
+	int64_t operand1 = string_to_int(tempBuffer, 10);
+
+	Kernel::out->putchar('=');
+	switch (sign) {
+		case '+':
+			Kernel::out->putint(operand0 + operand1);
+			break;
+		case '-':
+			Kernel::out->putint(operand0 - operand1);
+			break;
+		case '*':
+			Kernel::out->putint(operand0 * operand1);
+			break;
+		case '/':
+			if(operand1) {
+				Kernel::out->putint(operand0 / operand1);
+			}
+			else {
+				Kernel::out->putchar('0');
+			}
+			break;
+		default:
+			Kernel::out->puts("Error: Undefined operation");
+			break;
+	}
+	Kernel::out->newLine();
+
+	delete[] tempBuffer;
+}
+
+
+
+void Shell::setGMT() {
+	char* tempBuffer = new char[10];
+	Kernel::in->get_word(tempBuffer, 10);
+	int8_t gmt = (int8_t)string_to_int(tempBuffer, 10);
+	Time::setGMT(gmt);
+	delete[] tempBuffer;
+	Kernel::out->puts("GMT set to ");
+	Kernel::out->putint(Time::getGMT());
+}
+
+void Shell::cowsay() {
+
+	char* tempBuffer = new char[64];
+	Kernel::in->gets(tempBuffer, 64);
+
+	size_t length = strlen(tempBuffer);
+	Kernel::out->putchar(' ');
+	for (size_t i = 0; i < length + 2; i++) {
+		Kernel::out->putchar('_');
+	}
+	Kernel::out->puts("\n< ");
+	Kernel::out->puts(tempBuffer);
+	Kernel::out->puts(">\n ");
+	for (size_t i = 0; i < length + 2; i++) {
+		Kernel::out->putchar('-');
+	}
+
+	Kernel::out->putchar('\n');
+	Kernel::out->puts("  \\ ^__^\n");
+	Kernel::out->puts("    (oo)\\_______\n");
+	Kernel::out->puts("    (__)\\       )\\/\\\n");
+	Kernel::out->puts("        ||----w |\n");
+	Kernel::out->puts("        ||     ||\n");
 }

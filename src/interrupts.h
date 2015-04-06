@@ -9,8 +9,9 @@ struct IDTDescr{
    uint8_t type_attr; // type and attributes, see below
    uint16_t offset_higherbits; // offset bits 16..31
 }__attribute__((packed));
-
-extern "C" void init_idt();
+void timerTick();
+extern "C" void initialize_idt();
 extern "C" void keyboard_handler_c();
-extern "C" void enable_kb();
+extern "C" void unmask_interrupts();
+extern "C" void initialize_timer();
 #endif /*INTERRUPTS_H*/

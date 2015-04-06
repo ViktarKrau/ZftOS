@@ -13,7 +13,7 @@ boot:
 idt:
 	$(ASM) src/idt.s -o obj/idt.o
 
-cppcompile: new memory interrupts main kernel enterqueue inputstream terminal zft_memory string shell time bitmap
+cppcompile: new memory interrupts main kernel enterqueue inputstream terminal zft_memory string shell time bitmap speaker paging
 main:
 	$(GPP) -c src/main.c++ -o obj/main.o $(PFLAGS)
 kernel:
@@ -30,6 +30,8 @@ memory:
 	$(GPP) -c src/memory.c++ -o obj/memory.o $(PFLAGS)
 string:
 	$(GPP) -c src/string.c -o obj/string.o $(PFLAGS)
+paging:
+	$(GPP) -c src/paging.c -o obj/paging.o $(PFLAGS)
 interrupts:
 	$(GPP) -c src/interrupts.c -o obj/interrupts.o $(PFLAGS)
 shell:
@@ -40,15 +42,18 @@ new:
 	$(GPP) -c src/new.c++ -o obj/new.o $(PFLAGS)
 bitmap:
 	$(GPP) -c src/bitmap.c++ -o obj/bitmap.o $(PFLAGS)
-
+speaker:
+	$(GPP) -c src/speaker.c++ -o obj/speaker.o $(PFLAGS)
 
 link:
-	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/memory.o obj/inputstream.o obj/enterqueue.o obj/idt.o -lgcc
+	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/speaker.o obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/memory.o obj/inputstream.o obj/enterqueue.o obj/paging.o obj/idt.o -lgcc
 
 
 
 run:
 	qemu-system-i386 -kernel bin/zftos.bin
-	
+runiso:
+	qemu-system-i386 -cdrom	 bin/zftos.iso
+
 iso:
 	grub-mkrescue -o bin/zftos.iso bin/isodir

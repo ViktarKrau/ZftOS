@@ -10,10 +10,16 @@ uint32_t EnterQueue::position = 0;
 bool EnterQueue::isHandlerSet = false;
 bool EnterQueue::shiftHold = false;
 void (*EnterQueue::handler)(uint8_t keycode);
-void enter_queue_push(uint8_t keycode){
+
+
+
+void enter_queue_push(uint8_t keycode) {
 	EnterQueue::push(keycode);
 }
-void EnterQueue::push(uint8_t keycode){
+
+
+
+void EnterQueue::push(uint8_t keycode) {
 	if(isHandlerSet){
 		return handler(keycode);
 	}
@@ -30,8 +36,14 @@ void EnterQueue::push(uint8_t keycode){
 	if(position == ENTER_QUEUE_SIZE){
 		position = 0;
 	}
+	if(position == offset) {
+		offset++;
+	}
 }
-uint8_t EnterQueue::pop(){
+
+
+
+uint8_t EnterQueue::pop() {
 	if(offset == position){
 		return 0;
 	}
@@ -42,13 +54,22 @@ uint8_t EnterQueue::pop(){
 	}
 	return queue[offset - 1];
 }
-void EnterQueue::setKeyboardHandler(void (*_handler)(uint8_t keycode)){
+
+
+
+void EnterQueue::setKeyboardHandler(void (*_handler)(uint8_t keycode)) {
 	handler = _handler;
 	isHandlerSet = true;
 }
-void EnterQueue::resetKeyboardHandler(){
+
+
+
+void EnterQueue::resetKeyboardHandler() {
 	isHandlerSet = false;
 }
+
+
+
 bool EnterQueue::isShiftHold(){
 	return shiftHold;
 }

@@ -14,7 +14,7 @@ public:
 	EnterQueue();
 	static void push(uint8_t keycode);
 	static uint8_t pop();
-	//static void init();
+	//static void initialize();
 	static void setKeyboardHandler(void (*_handler)(uint8_t keycode));
 	static void resetKeyboardHandler();
 	static bool isShiftHold();

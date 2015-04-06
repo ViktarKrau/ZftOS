@@ -1,10 +1,12 @@
-#include <stdint-gcc.h>
 #include "zftdef.h"
+
 #ifndef _ZFTOS_DEV_TIME_H
 #define _ZFTOS_DEV_TIME_H
 
+
 class Time {
 public:
+    Time();
     Time(uint8_t _second, uint8_t _minute, uint8_t _hour, uint8_t _day, uint8_t _month, uint8_t _year);
     uint8_t second;
     uint8_t minute;
@@ -13,8 +15,8 @@ public:
     uint8_t month;
     uint8_t year;
 
-
-    static void init();
+    static void delay(uint64_t delayInMilliseconds);
+    static void initialize();
     static Time getCurrentTime();
     static void update(Time& time);
     static uint8_t getSecond();
@@ -23,7 +25,13 @@ public:
     static uint8_t getDay();
     static uint8_t getMonth();
     static uint8_t getYear();
+    static int8_t getGMT();
+    static void setGMT(int8_t value);
+    friend void timerTick();
+    static uint64_t getMilliseconds();
 private:
+    static volatile uint64_t milliseconds;
+    static int8_t GMT;
     static bool needConvert;
     static bool isClockFormatWrong;
     static bool isUpdateInProgress();

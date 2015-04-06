@@ -1,9 +1,7 @@
 #include <multiboot.h>
 #include "zftdef.h"
 #include "kernel.h"
-#include "zftdef.h"
-#include "string.h"
-#include "zft_memory.h"
+#include "iob.h"
 #include "interrupts.h"
 #include "time.h"
 #include "memory.h"
@@ -11,10 +9,12 @@
 #define MEMORY_START (2 << 20)
 
 void kernel_start(multiboot_info_t* info){
-
-	init_idt();
-	enable_kb();
-	Time::init();
+	disable_interrupts();
+	initialize_idt();
+	unmask_interrupts();
+	initialize_timer();
+	enable_interrupts();
+	Time::initialize();
 	forbidden::Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
 	Kernel kernel(info);
 	kernel.run();

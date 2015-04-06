@@ -10,6 +10,8 @@ public:
 	InputStream();
 	uint8_t getkey();
 	char getchar();
+	void gets(char* buffer, size_t size);
+	void get_word(char* buffer, size_t size);
 	uint8_t getkey_nolock();
 	char getchar_nolock();
 	~InputStream();

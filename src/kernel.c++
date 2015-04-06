@@ -8,21 +8,31 @@ Terminal* Kernel::out;
 InputStream* Kernel::in;
 /*TODO replace color to BLUE*/
 
-Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_RED, COLOR_LIGHT_GREY){
+
+
+Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_RED, COLOR_LIGHT_GREY) {
 	out = &__out;
 	in = &__in;
 	memoryUpper = info->mem_upper;
 	memoryLower = info->mem_lower;
 }
 
-Kernel::~Kernel(){
+
+
+Kernel::~Kernel() {
 }
+
+
+
 void Kernel::cycleWait(uint64_t ticks) {
-	for(uint64_t i = 0; i < ticks; ++i){
+	for (uint64_t i = 0; i < ticks; ++i) {
 	}
 }
-void Kernel::exit(ExitType type){
-	if(type == REBOOT){
+
+
+
+void Kernel::exit(ExitType type) {
+	if (type == REBOOT) {
 		out->puts("\n\t\t\t\tREBOOT....");
 		uint8_t good = 0x02;
 		while (good & 0x02){
@@ -31,10 +41,18 @@ void Kernel::exit(ExitType type){
 		outb(0x64, 0xFE);
 		halt();
 	}
-	else{
-		out->puts("\n\t\t\t\tSHUTDOWN....");
+	else {
+		out->setColor(TerminalColor::COLOR_RED, TerminalColor::COLOR_BLACK);
+		out->clear();
+		out->putsln("\n\n\n\n\n\n\n\n");
+		out->puts("\n\t\t\t\t\tPower can be turned off safely");
+		disable_interrupts();
+		halt();
 	}
 }
+
+
+
 void Kernel::run(){
 /*
 	out->putsln("0xB8000 is equal to ");

@@ -82,6 +82,39 @@ char* int_to_string(int64_t value, char* buffer, uint8_t base){
 	return reverse(buffer);
 }
 
+
+
+BOOL is_numeric_char(char x)
+{
+	return (x >= '0' && x <= '9')? (BOOL)TRUE : (BOOL)FALSE;
+}
+
+
+
+int64_t string_to_int(char *str, uint8_t base)
+{
+	if (*str == '\0')
+		return 0;
+
+	int64_t res = 0;
+	int8_t sign = 1;
+	size_t i = 0;
+
+	if (str[0] == '-') {
+		sign = -1;
+		++i;
+	}
+
+	for (; str[i] != '\0'; ++i) {
+		if (!is_numeric_char(str[i]))
+			return 0;
+
+		res = res * base + str[i] - '0';
+	}
+
+
+	return sign * res;
+}
 /*char* sprintf(char* destination, const char* format, ...){
 	const char** stack_ptr = &format;
 	stack_ptr++;

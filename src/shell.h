@@ -8,6 +8,9 @@ class Shell
 public:
 	Shell();
 	void run();
+	void calc();
+	void setGMT();
+	void cowsay();
 	void printTime();
 	~Shell();
 private:
