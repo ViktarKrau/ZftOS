@@ -1,6 +1,7 @@
 #include "zftdef.h"
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
+#define NUMBER_BUFF_SIZE 0xF
 #ifndef TERMINAL_H
 #define TERMINAL_H
 enum TerminalColor{
@@ -60,7 +61,7 @@ public:
 	~Terminal();
 
 private:
-	char numberBuff[0xF];
+	char numberBuff[NUMBER_BUFF_SIZE];
 	size_t row;
 	size_t column;
 	ColorByte color;
@@ -70,5 +71,6 @@ private:
 	void scroll();
 	uint16_t makeColoredChar(char c);
 	uint16_t makeColoredChar(char c, ColorByte _color);
+	friend class TerminalStateBuffer;
 };
 #endif /*TERMINAL_H*/

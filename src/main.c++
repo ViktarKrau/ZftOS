@@ -5,17 +5,23 @@
 #include "interrupts.h"
 #include "time.h"
 #include "memory.h"
+#include "paging.h"
+
+
 
 #define MEMORY_START (2 << 20)
 
+
+
 void kernel_start(multiboot_info_t* info){
 	disable_interrupts();
+	initialize_gdt();
 	initialize_idt();
 	unmask_interrupts();
 	initialize_timer();
 	enable_interrupts();
 	Time::initialize();
-	forbidden::Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
+	Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
 	Kernel kernel(info);
 	kernel.run();
 

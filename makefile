@@ -13,7 +13,7 @@ boot:
 idt:
 	$(ASM) src/idt.s -o obj/idt.o
 
-cppcompile: new memory interrupts main kernel enterqueue inputstream terminal zft_memory string shell time bitmap speaker paging
+cppcompile: new memory interrupts main kernel enterqueue inputstream terminal terminalstatebuffer zft_memory string shell time bitmap speaker paging
 main:
 	$(GPP) -c src/main.c++ -o obj/main.o $(PFLAGS)
 kernel:
@@ -24,6 +24,8 @@ inputstream:
 	$(GPP) -c src/inputstream.c++ -o obj/inputstream.o $(PFLAGS)
 terminal:
 	$(GPP) -c src/terminal.c++ -o obj/terminal.o $(PFLAGS)
+terminalstatebuffer:
+	$(GPP) -c src/terminalstatebuffer.c++ -o obj/terminalstatebuffer.o $(PFLAGS)
 zft_memory:
 	$(GPP) -c src/zft_memory.c -o obj/zft_memory.o $(PFLAGS)
 memory:
@@ -46,7 +48,7 @@ speaker:
 	$(GPP) -c src/speaker.c++ -o obj/speaker.o $(PFLAGS)
 
 link:
-	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/speaker.o obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/memory.o obj/inputstream.o obj/enterqueue.o obj/paging.o obj/idt.o -lgcc
+	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/speaker.o obj/new.o obj/boot.o obj/main.o obj/kernel.o obj/terminalstatebuffer.o obj/shell.o obj/time.o obj/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o obj/memory.o obj/inputstream.o obj/enterqueue.o obj/paging.o obj/idt.o -lgcc
 
 
 

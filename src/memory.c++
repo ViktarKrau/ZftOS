@@ -3,7 +3,7 @@
 #define MINIMUM_FREE_BLOCK_SIZE sizeof(size_t) + sizeof(size_t*)
 
 
-using namespace forbidden;
+
 Memory Memory::memory;
 
 

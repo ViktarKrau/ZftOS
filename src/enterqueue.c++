@@ -4,7 +4,9 @@
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_RELEASED 0xB6
 
-uint8_t EnterQueue::queue[ENTER_QUEUE_SIZE];
+
+
+volatile uint8_t EnterQueue::queue[ENTER_QUEUE_SIZE];
 uint32_t EnterQueue::offset = 0;
 uint32_t EnterQueue::position = 0;
 bool EnterQueue::isHandlerSet = false;
@@ -20,23 +22,23 @@ void enter_queue_push(uint8_t keycode) {
 
 
 void EnterQueue::push(uint8_t keycode) {
-	if(isHandlerSet){
+	if(isHandlerSet) {
 		return handler(keycode);
 	}
-	if (keycode == RIGHT_SHIFT_RELEASED || keycode == LEFT_SHIFT_RELEASED){
+	if (keycode == RIGHT_SHIFT_RELEASED || keycode == LEFT_SHIFT_RELEASED) {
 		shiftHold = false;
 		return;
 	}
-	if (keycode == LEFT_SHIFT_PRESSED || keycode == RIGHT_SHIFT_PRESSED){
+	if (keycode == LEFT_SHIFT_PRESSED || keycode == RIGHT_SHIFT_PRESSED) {
 		shiftHold = true;
 		return;
 	}
 	queue[position] = keycode;
 	position++;
-	if(position == ENTER_QUEUE_SIZE){
+	if (position == ENTER_QUEUE_SIZE) {
 		position = 0;
 	}
-	if(position == offset) {
+	if (position == offset) {
 		offset++;
 	}
 }

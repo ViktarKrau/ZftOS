@@ -16,6 +16,9 @@ const char helptext[] = "\tZunft OS ver. 0.02\n"
 						"\t\tcalc -- calculate something\n"
 						"\t\tsetgmt -- setting current gmt";
 
+
+
+
 Shell::Shell() {
 }
 
@@ -77,10 +80,10 @@ void Shell::printTime() {
 }
 void Shell::run() {
 	Kernel::out->clear();
-	Kernel::out->putsln("                         WELCOME TO ZUNFT OS SHELL!"
+	Kernel::out->putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS SHELL!"
 						"\nType \"help\" to get list of available commands");
 
-	Time::delay(1000);
+	//Time::delay(1000);
 	printTime();
 
 /*	Kernel::out->putsln("");
@@ -131,6 +134,8 @@ void Shell::run() {
 		}
 	}
 }
+
+
 
 void Shell::runMemTest() {
 	for(size_t i = 1; i < 100; ++i){
@@ -217,6 +222,8 @@ void Shell::setGMT() {
 	Kernel::out->puts("GMT set to ");
 	Kernel::out->putint(Time::getGMT());
 }
+
+
 
 void Shell::cowsay() {
 

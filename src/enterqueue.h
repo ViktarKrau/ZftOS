@@ -23,7 +23,7 @@ private:
 	static bool shiftHold;
 	static void (*handler)(uint8_t keycode);
 	static bool isHandlerSet;
-	static uint8_t queue[0x400];
+	static volatile uint8_t queue[ENTER_QUEUE_SIZE];
 	static uint32_t offset;
 	static uint32_t position;
 };

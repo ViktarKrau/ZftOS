@@ -7,108 +7,140 @@
 #define KEYBOARD_STATUS_PORT 0x64
 #define TIMER_HARDWIRED_FREQUENCY 1193180
 #define FREQUENCY 1
-
-
+#define PIC_MASTER_CONTROL_PORT 0x20
+#define PIC_SLAVE_CONTROL_PORT 0xA0
+#define PIC_MASTER_DATA_PORT 0x21
+#define PIS_SLAVE_DATA_PORT 0xA1
+#define ICW1_INIT 0x10
+#define ICW1_ENABLE_ICW4 0x01
+#define ICW2_MASTER_OFFSET_INTERRUPT_SERVICE_ROUTINES 0x20
+#define ICW2_SLAVE_OFFSET_INTERRUPT_SERVICE_ROUTINES 0x28
+#define ICW3_MASTER_2ND_LINE_CONNECTED_TO_SLAVE 0x04
+#define ICW3_SLAVE_CONNECTED_TO_MASTER_2ND_LINE 0x02
+#define ICW4_86_MODE 0x01
+#define EOI	0x20
+#define WRITE_EOI() outb(PIC_MASTER_CONTROL_PORT, EOI)
+#define TIMER_CONTROL_PORT 0x43
+#define TIMER_ZERO_CHANNEL_SQUARE_WAVE_MODE_INITIALIZE 0x34
+#define TIMER_ZERO_CHANNEL_PORT 0x40
+#define KEYBOARD_INTERRUPT_ENTRY_NUMBER 0x21
+#define TIMER_INTERRUPT_ENTRY_NUMBER 0x20
+#define INTERRUPT_GATE 0x8E
+#define FULL_MASK 0xFF
+#define UNMASK_TIMER_INTERRUPT 0xFE
+#define UNMASK_KEYBOARD_INTERRUPT 0xFD
+#define GET_LOWER_WORD(x) (x & 0xFFFF)
+#define GET_HIGHER_WORD(x) ((x & 0xffff0000) >> 16)
+#define IS_LOWEST_BIT_SET(x) (x & 0x1)
+#define GET_LOWER_BYTE(x) (x & 0xFF)
+#define GET_HIGHER_BYTE(x) ((x >> 8) & 0xFF)
+#define WORD_BITS_COUNT 16
 struct IDTDescr IDT[IDT_SIZE];
+
+
 
 extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
-//Use C linkage for keyboard_handler.
+
+
 
 extern "C"
-void keyboard_handler_c(){
+void keyboard_handler_c() {
 	uint8_t status;
 	uint8_t keycode;
 
 	status = inb(KEYBOARD_STATUS_PORT);
 	/* Lowest bit of status will be set if buffer is not empty */
-	if (status & 0x01) {
+	if (IS_LOWEST_BIT_SET(status)) {
 		keycode = inb(KEYBOARD_DATA_PORT);
 		enter_queue_push(keycode);
 	}
-		/* write EOI */
-	outb(0x20, 0x20);
+	WRITE_EOI();
 }
+
+
 
 extern "C"
 void timer_handler_c() {
 	timerTick();
-	outb(0x20, 0x20);
+	WRITE_EOI();
 }
+
+
+
 extern "C"
 void initialize_timer() {
 	uint32_t divisor = TIMER_HARDWIRED_FREQUENCY / FREQUENCY;
-	outb(0x43, 0x34/*6*/);
+	outb(TIMER_CONTROL_PORT, TIMER_ZERO_CHANNEL_SQUARE_WAVE_MODE_INITIALIZE);
 
-	uint8_t l = (uint8_t) (divisor & 0xFF);
+	uint8_t lower_bits = (uint8_t) (GET_LOWER_BYTE(divisor));
 
 	// Send the frequency divisor.
-	outb(0x40, l);
-	uint8_t h = (uint8_t) ((divisor >> 8) & 0xFF);
-	for(uint32_t delay = 0; delay < 0xFFFFFFFE; ++delay) {
-	}													//Delay to init timer in proper way
-	outb(0x40, h);
+	outb(TIMER_ZERO_CHANNEL_PORT, lower_bits);
+	uint8_t higher_bits = (uint8_t) (GET_HIGHER_BYTE(divisor));
+	//MIGHT NEED DELAY HERE!!!!
+	outb(TIMER_ZERO_CHANNEL_PORT, higher_bits);
 }
 
+
+
+void make_idt_entry (struct IDTDescr* descr, void (*handler)(), uint16_t selector, uint8_t type_attr) {
+	uint32_t handler_address = (uint32_t)handler;
+	descr->offset_lowerbits = (uint16_t) (GET_LOWER_WORD(handler_address));
+	descr->selector = selector;
+	descr->zero = 0;
+	descr->type_attr = type_attr;
+	descr->offset_higherbits = (uint16_t) (GET_HIGHER_WORD(handler_address));
+}
+
+
+
 extern "C"
-void initialize_idt(){
-	uint32_t timer_handler_addrees;
-	uint32_t keyboard_handler_address;
+void initialize_idt() {
+	get_cs();
+
 	uint32_t idt_address;
 	uint32_t idt_ptr[2];
 
-	/*KEYBOARD*/
-	keyboard_handler_address = (uint32_t)keyboard_handler;
-	IDT[0x21].offset_lowerbits = (uint16_t) (keyboard_handler_address & 0xffff);
-	IDT[0x21].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[0x21].zero = 0;
-	IDT[0x21].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[0x21].offset_higherbits = (uint16_t) ((keyboard_handler_address & 0xffff0000) >> 16);
 
-	/*TIMER*/
-	timer_handler_addrees = (uint32_t)timer_handler;
-	IDT[0x20].offset_lowerbits = (uint16_t) (timer_handler_addrees & 0xffff);
-	IDT[0x20].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[0x20].zero = 0;
-	IDT[0x20].type_attr = 0x8E; /* INTERRUPT_GATE */
-	IDT[0x20].offset_higherbits = (uint16_t) ((timer_handler_addrees & 0xffff0000) >> 16);
-
+	make_idt_entry(IDT + KEYBOARD_INTERRUPT_ENTRY_NUMBER, keyboard_handler, (uint16_t)__cs, INTERRUPT_GATE);
+	make_idt_entry(IDT + TIMER_INTERRUPT_ENTRY_NUMBER, timer_handler, (uint16_t)__cs, INTERRUPT_GATE);
 
 
 	idt_address = (uint32_t)&IDT;
-	idt_ptr[0] = (uint32_t) ((sizeof (struct IDTDescr) * IDT_SIZE) + ((idt_address & 0xffff) << 16));
-	idt_ptr[1] = idt_address >> 16;
+	idt_ptr[0] = (uint32_t) ((sizeof (struct IDTDescr) * IDT_SIZE)
+			+ (GET_LOWER_WORD(idt_address) << WORD_BITS_COUNT));
+	idt_ptr[1] = GET_HIGHER_WORD(idt_address);
 	load_idt(idt_ptr);
 
-	/*     Ports
-	*	 PIC1	PIC2
-	*Command 0x20	0xA0
-	*Data	 0x21	0xA1
-	*/
-	outb(0x20 , 0x11);
-	outb(0xA0 , 0x11);
+	/*ICW1*/
+	outb(PIC_MASTER_CONTROL_PORT, ICW1_ENABLE_ICW4 | ICW1_INIT);
+	outb(PIC_SLAVE_CONTROL_PORT, ICW1_ENABLE_ICW4 | ICW1_INIT);
 
 	/* ICW2 */
-	outb(0x21 , 0x20);
-	outb(0xA1 , 0x28);
+	outb(PIC_MASTER_DATA_PORT, ICW2_MASTER_OFFSET_INTERRUPT_SERVICE_ROUTINES);
+	outb(PIS_SLAVE_DATA_PORT, ICW2_SLAVE_OFFSET_INTERRUPT_SERVICE_ROUTINES);
 
 	/* ICW3*/
-	outb(0x21 , 0x04);
-	outb(0xA1 , 0x02);
+	outb(PIC_MASTER_DATA_PORT, ICW3_MASTER_2ND_LINE_CONNECTED_TO_SLAVE);
+	outb(PIS_SLAVE_DATA_PORT, ICW3_SLAVE_CONNECTED_TO_MASTER_2ND_LINE);
 
 	/* ICW4*/
-	outb(0x21 , 0x01);
-	outb(0xA1 , 0x01);
+	outb(PIC_MASTER_DATA_PORT, ICW4_86_MODE);
+	outb(PIS_SLAVE_DATA_PORT, ICW4_86_MODE);
 	/* Initialization finished */
 
 	/*Masks*/
-	outb(0x21, 0xFF);
-	outb(0xA1, 0xFF);
+	outb(PIC_MASTER_DATA_PORT, FULL_MASK);
+	outb(PIS_SLAVE_DATA_PORT, FULL_MASK);
 
 
 }
+
+
+
 extern "C"
 void unmask_interrupts(){
-	outb(0x21 , 0xFC); // FD
+	outb(PIC_MASTER_DATA_PORT, FULL_MASK & UNMASK_KEYBOARD_INTERRUPT & UNMASK_TIMER_INTERRUPT);
 }
