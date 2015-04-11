@@ -26,6 +26,13 @@ public:
     static uint8_t getMonth();
     static uint8_t getYear();
     static int8_t getGMT();
+    static void setTime(const Time& time);
+    static void setSecond(uint8_t second);
+    static void setMinute(uint8_t minute);
+    static void setHour(uint8_t hour);
+    static void setDay(uint8_t day);
+    static void setMonth(uint8_t month);
+    static void setYear(uint8_t year);
     static void setGMT(int8_t value);
     friend void timerTick();
     static uint64_t getMilliseconds();

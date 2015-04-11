@@ -1,4 +1,7 @@
 #include "zftdef.h"
+
+
+
 #ifndef IOB_H
 #define IOB_H
 
@@ -28,7 +31,12 @@ static __inline void enable_interrupts() {
 	__asm__ ("sti");
 }
 
+
+
 static __inline void disable_interrupts() {
 	__asm__ ("cli");
 }
+
+
+
 #endif

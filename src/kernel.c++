@@ -1,18 +1,18 @@
 #include "kernel.h"
 #include "iob.h"
-#include "interrupts.h"
-#include "shell.h"
+#include "app/shell.h"
+
 
 
 Terminal* Kernel::out;
 InputStream* Kernel::in;
-/*TODO replace color to BLUE*/
-
+Scheduler* Kernel::scheduler;
 
 
 Kernel::Kernel(multiboot_info_t* info) : __out(COLOR_RED, COLOR_LIGHT_GREY) {
 	out = &__out;
 	in = &__in;
+	scheduler = &__scheduler;
 	memoryUpper = info->mem_upper;
 	memoryLower = info->mem_lower;
 }
@@ -42,46 +42,22 @@ void Kernel::exit(ExitType type) {
 		halt();
 	}
 	else {
+		disable_interrupts();
+		out->setStatus("");
 		out->setColor(TerminalColor::COLOR_RED, TerminalColor::COLOR_BLACK);
 		out->clear();
 		out->putsln("\n\n\n\n\n\n\n\n");
-		out->puts("\n\t\t\t\t\tPower can be turned off safely");
-		disable_interrupts();
-		halt();
+		out->puts("\n\t\t\t\t\tIt\'s now safe to turn off your PC.");
+		while (true) {
+			halt();
+		}
 	}
 }
 
 
 
-void Kernel::run(){
-/*
-	out->putsln("0xB8000 is equal to ");
-	out->putbytes(0xB8000);
-	out->putsln("\nend of terminal is equal to");
-	out->putbytes(0xB8000 + 25 * 80 * 2);
-	out->putsln("\nIDT begins: ");
-	out->putbytes((uint32_t)IDT);
-	out->putsln("\nIDT ends: ");
-	out->putbytes((uint32_t)IDT + 256 * 8);
-	out->putsln("\nsizeof(IDTDescr)");
-	out->putbytes(sizeof(IDTDescr));
-	out->putsln("\nsizeof(void*)");
-	out->putint(sizeof(void*));
-
-	out->puts("\nkernel location:  ");
-	out->putbytes((uint32_t)this);
-	out->puts("\nStrlen location:  ");
-	out->putbytes((uint32_t)strlen);
-	out->puts("\nmemduplicate location:  ");
-	out->putbytes((uint32_t)memduplicate);
-
-	out->puts("\nsizeof(int):  ");
-	out->putint(sizeof(int));
-	out->puts("\nsizeof(IDTDescr):   ");
-	out->putint(sizeof(IDTDescr));*/
-
+void Kernel::run() {
 	Shell shell;
-	shell.run();
+	shell.schedule(0);
 	out->putsln("\n\n\nSHELL EXITED\n\n\n");
 }
-

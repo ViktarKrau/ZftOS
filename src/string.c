@@ -2,6 +2,7 @@
 #include "zft_memory.h"
 
 
+
 BOOL is_empty(const char* string){
 	char* stringptr = (char*)string;
 	while(*stringptr){
@@ -12,17 +13,24 @@ BOOL is_empty(const char* string){
 	}
 	return TRUE;
 }
+
+
+
 size_t strlen(const char* string){
 	size_t retval = 0;
 	while(string[retval++]);
 	return retval;
 }
 
+
+
 uint8_t strcmp(const char* string_a, const char* string_b){
 	size_t i;
 	for(i = 0; string_a[i] && string_b[i] && string_a[i] == string_b[i]; ++i);
 	return (uint8_t) (string_b[i] - string_a[i]);
 }
+
+
 
 char* strcpy(char* destination, const char* source){
 	memcpy((void*)destination, (const void*)source, strlen(source));
@@ -43,6 +51,7 @@ char* reverse(char* string){
 }
 
 
+
 char* uint_to_string(uint64_t value, char* buffer, uint8_t base){
 	size_t string_iterator = 0;
 	char temp;
@@ -59,6 +68,9 @@ char* uint_to_string(uint64_t value, char* buffer, uint8_t base){
 	buffer[string_iterator] = '\0';
 	return reverse(buffer);
 }
+
+
+
 char* int_to_string(int64_t value, char* buffer, uint8_t base){
 	BOOL sign = (BOOL)(value < 0);
 	size_t string_iterator;
@@ -115,6 +127,9 @@ int64_t string_to_int(char *str, uint8_t base)
 
 	return sign * res;
 }
+
+
+
 /*char* sprintf(char* destination, const char* format, ...){
 	const char** stack_ptr = &format;
 	stack_ptr++;

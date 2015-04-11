@@ -1,7 +1,9 @@
 #include "zftdef.h"
 #include "interrupts.h"
 #include "iob.h"
-#include "enterqueue.h"
+#include "input/enterqueue.h"
+
+
 
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
@@ -25,6 +27,7 @@
 #define TIMER_ZERO_CHANNEL_PORT 0x40
 #define KEYBOARD_INTERRUPT_ENTRY_NUMBER 0x21
 #define TIMER_INTERRUPT_ENTRY_NUMBER 0x20
+#define PAGE_FAULT_INTERRUPT_ENTRY_NUMBER 0xE
 #define INTERRUPT_GATE 0x8E
 #define FULL_MASK 0xFF
 #define UNMASK_TIMER_INTERRUPT 0xFE
@@ -35,6 +38,9 @@
 #define GET_LOWER_BYTE(x) (x & 0xFF)
 #define GET_HIGHER_BYTE(x) ((x >> 8) & 0xFF)
 #define WORD_BITS_COUNT 16
+
+
+
 struct IDTDescr IDT[IDT_SIZE];
 
 
@@ -57,6 +63,13 @@ void keyboard_handler_c() {
 		enter_queue_push(keycode);
 	}
 	WRITE_EOI();
+}
+
+
+
+extern "C"
+void page_fault_handler() {
+	*(char*)(0xB8000) = 'A';
 }
 
 
@@ -85,6 +98,7 @@ void initialize_timer() {
 
 
 
+extern "C"
 void make_idt_entry (struct IDTDescr* descr, void (*handler)(), uint16_t selector, uint8_t type_attr) {
 	uint32_t handler_address = (uint32_t)handler;
 	descr->offset_lowerbits = (uint16_t) (GET_LOWER_WORD(handler_address));
@@ -106,6 +120,7 @@ void initialize_idt() {
 
 	make_idt_entry(IDT + KEYBOARD_INTERRUPT_ENTRY_NUMBER, keyboard_handler, (uint16_t)__cs, INTERRUPT_GATE);
 	make_idt_entry(IDT + TIMER_INTERRUPT_ENTRY_NUMBER, timer_handler, (uint16_t)__cs, INTERRUPT_GATE);
+	make_idt_entry(IDT + PAGE_FAULT_INTERRUPT_ENTRY_NUMBER, page_fault_handler, (uint16_t)__cs, INTERRUPT_GATE);
 
 
 	idt_address = (uint32_t)&IDT;

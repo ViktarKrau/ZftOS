@@ -4,8 +4,8 @@
 #include "iob.h"
 #include "interrupts.h"
 #include "time.h"
-#include "memory.h"
-#include "paging.h"
+#include "memory/memory.h"
+#include "memory/paging.h"
 
 
 
@@ -15,13 +15,13 @@
 
 void kernel_start(multiboot_info_t* info){
 	disable_interrupts();
-	initialize_gdt();
 	initialize_idt();
 	unmask_interrupts();
 	initialize_timer();
 	enable_interrupts();
 	Time::initialize();
 	Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
+	//Paging::initialize(info->mem_upper);
 	Kernel kernel(info);
 	kernel.run();
 
@@ -29,13 +29,10 @@ void kernel_start(multiboot_info_t* info){
 
 
 
-//Use C linkage for kernel_main.
 #if defined(__cplusplus)
-extern "C" 
-
+extern "C"
 #endif
-
-void kernel_main(multiboot_info_t* mbd){
+void kernel_main(multiboot_info_t* mbd, uint32_t stack_ptr){
 	kernel_start(mbd);
 
 }

@@ -2,33 +2,51 @@
 #include "time.h"
 #include "iob.h"
 #include "kernel.h"
-#define CMOS_ADRESS 0x70
-#define CMOS_DATA 0x71
+
+
+
+#define CMOS_STATUS_PORT 0x70
+#define CMOS_DATA_PORT 0x71
+#define RTC_B_REGISTER 0x0B
+#define RTC_A_REGISTER 0x0A
+#define HOUR_FORMAT_FLAG 0x02
+#define BCD_CLOCK_FORMAT_FLAG 0x04
+#define UPDATE_IN_PROGRESS_FLAG 0x80
+#define READ_SECONDS_COMMAND 0x00
+#define READ_MINUTES_COMMAND 0x02
+#define READ_HOURS_COMMAND 0x04
+#define READ_DAYS_COMMAND 0x07
+#define READ_MONTHS_COMMAND 0x08
+#define READ_YEARS_COMMAND 0x09
+
+
 
 bool Time::needConvert;
 bool Time::isClockFormatWrong;
 int8_t Time::GMT;
 volatile uint64_t Time::milliseconds;
 
-void Time::initialize(){
+
+
+void Time::initialize() {
     milliseconds = 0;
     GMT = 3;
-    needConvert = !((bool) (getRTCRegister(0x0B) & 0x04));
-    isClockFormatWrong = (bool) (getRTCRegister(0x0B) & 0x02);
+    needConvert = !((bool) (getRTCRegister(RTC_B_REGISTER) & BCD_CLOCK_FORMAT_FLAG));
+    isClockFormatWrong = (bool) (getRTCRegister(RTC_B_REGISTER) & HOUR_FORMAT_FLAG);
 }
 
 
 
 bool Time::isUpdateInProgress() {
-    outb(CMOS_ADRESS, 0x0A);
-    return (bool) (inb(CMOS_DATA) & 0x80);
+    outb(CMOS_STATUS_PORT, RTC_A_REGISTER);
+    return (bool) (inb(CMOS_DATA_PORT) & UPDATE_IN_PROGRESS_FLAG);
 }
 
 
 
 uint8_t Time::getRTCRegister(uint8_t reg) {
-    outb(CMOS_ADRESS, reg);
-    return inb(CMOS_DATA);
+    outb(CMOS_STATUS_PORT, reg);
+    return inb(CMOS_DATA_PORT);
 }
 
 
@@ -48,7 +66,7 @@ uint8_t Time::getTimeEntity(uint8_t reg)  {
 
 
 uint8_t Time::getValueFromBCD(uint8_t BCD) {
-    return (uint8_t) ((BCD & 0x0F) + ((BCD / 16) * 10));;
+    return (uint8_t) ((BCD & 0x0F) + ((BCD / 16) * 10));
 }
 
 
@@ -64,13 +82,13 @@ uint8_t Time::getConvertedTimeEntity(uint8_t reg) {
 
 
 uint8_t Time::getSecond() {
-    return getConvertedTimeEntity(0x00);
+    return getConvertedTimeEntity(READ_SECONDS_COMMAND);
 }
 
 
 
 uint8_t Time::getMinute() {
-    return getConvertedTimeEntity(0x02);
+    return getConvertedTimeEntity(READ_MINUTES_COMMAND);
 }
 
 
@@ -90,12 +108,12 @@ void Time::update(Time& time) {
 
 
 uint8_t Time::getHour() {
-    uint8_t hour = getTimeEntity(0x04);
-    if(needConvert){
+    uint8_t hour = getTimeEntity(READ_HOURS_COMMAND);
+    if (needConvert) {
         //hour = getValueFromBCD(hour);
         hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
     }
-    if(isClockFormatWrong && (hour & 0x80)){
+    if (isClockFormatWrong && (hour & 0x80)) {
         hour = (uint8_t) (((hour & 0x7F) + 12) % 24);
     }
     return hour;
@@ -104,19 +122,19 @@ uint8_t Time::getHour() {
 
 
 uint8_t Time::getDay() {
-    return getConvertedTimeEntity(0x07);
+    return getConvertedTimeEntity(READ_DAYS_COMMAND);
 }
 
 
 
 uint8_t Time::getMonth() {
-    return getConvertedTimeEntity(0x08);
+    return getConvertedTimeEntity(READ_MONTHS_COMMAND);
 }
 
 
 
 uint8_t Time::getYear() {
-    return getConvertedTimeEntity(0x09);
+    return getConvertedTimeEntity(READ_YEARS_COMMAND);
 }
 
 
@@ -178,8 +196,9 @@ void Time::setGMT(int8_t value) {
 
 
 Time::Time() {
-
 }
+
+
 
 void Time::delay(uint64_t delayInMilliseconds) {
     uint64_t end = delayInMilliseconds + milliseconds;
@@ -191,7 +210,6 @@ void Time::delay(uint64_t delayInMilliseconds) {
 
 
 uint64_t Time::getMilliseconds() {
-
     return milliseconds;
 }
 
@@ -201,6 +219,55 @@ void timerTick() {
     Time::milliseconds += 10;
 }
 
+
+
 int8_t Time::getGMT() {
     return GMT;
+}
+
+/*TODO: IMPLEMENT THESE*/
+
+void Time::setTime(const Time& time) {
+    setYear(time.year);
+    setMonth(time.month);
+    setDay(time.day);
+    setHour(time.hour);
+    setMinute(time.minute);
+    setSecond(time.second);
+}
+
+
+
+void Time::setSecond(uint8_t second) {
+
+}
+
+
+
+void Time::setMinute(uint8_t minute) {
+
+}
+
+
+
+void Time::setHour(uint8_t hour) {
+
+}
+
+
+
+void Time::setDay(uint8_t day) {
+
+}
+
+
+
+void Time::setMonth(uint8_t month) {
+
+}
+
+
+
+void Time::setYear(uint8_t year) {
+
 }
