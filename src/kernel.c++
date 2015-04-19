@@ -61,3 +61,9 @@ void Kernel::run() {
 	shell.schedule(0);
 	out->putsln("\n\n\nSHELL EXITED\n\n\n");
 }
+
+
+
+void Kernel::initializeTasking(uint32_t stack) {
+
+}

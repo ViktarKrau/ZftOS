@@ -48,7 +48,7 @@ struct IDTDescr IDT[IDT_SIZE];
 extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
-
+void switchTasks();
 
 
 extern "C"
@@ -77,6 +77,7 @@ void page_fault_handler() {
 extern "C"
 void timer_handler_c() {
 	timerTick();
+	//switchTasks();
 	WRITE_EOI();
 }
 

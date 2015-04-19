@@ -4,7 +4,11 @@
 
 
 Executable::Executable(bool _screenNeeded) {
+    pid = 0;
     isNewScreenNeeded = _screenNeeded;
+    registers.ebp = 0;
+    registers.eip = 0;
+    registers.esp;
 }
 
 
@@ -51,4 +55,23 @@ void Executable::printArgs(Vector<char *> &args) {
     for (auto i = args.begin(); i != args.end(); ++i) {
         Kernel::out->putsln(*i);
     }
+}
+
+
+
+pid_t Executable::getPid() {
+    return pid;
+}
+
+
+
+/*TODO: IMPLEMENT THESE*/
+void Executable::saveContext() {
+
+}
+
+
+
+void Executable::loadContext() {
+
 }

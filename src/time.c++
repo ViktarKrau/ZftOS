@@ -12,12 +12,12 @@
 #define HOUR_FORMAT_FLAG 0x02
 #define BCD_CLOCK_FORMAT_FLAG 0x04
 #define UPDATE_IN_PROGRESS_FLAG 0x80
-#define READ_SECONDS_COMMAND 0x00
-#define READ_MINUTES_COMMAND 0x02
-#define READ_HOURS_COMMAND 0x04
-#define READ_DAYS_COMMAND 0x07
-#define READ_MONTHS_COMMAND 0x08
-#define READ_YEARS_COMMAND 0x09
+#define RTC_SECONDS_REGISTER 0x00
+#define RTC_MINUTES_REGISTER 0x02
+#define RTC_HOURS_REGISTER 0x04
+#define RTC_DAYS_REGISTER 0x07
+#define RTC_MONTHS_REGISTER 0x08
+#define RTC_YEARS_REGISTER 0x09
 
 
 
@@ -25,7 +25,6 @@ bool Time::needConvert;
 bool Time::isClockFormatWrong;
 int8_t Time::GMT;
 volatile uint64_t Time::milliseconds;
-
 
 
 void Time::initialize() {
@@ -73,7 +72,7 @@ uint8_t Time::getValueFromBCD(uint8_t BCD) {
 
 uint8_t Time::getConvertedTimeEntity(uint8_t reg) {
     uint8_t entity = getTimeEntity(reg);
-    if(needConvert){
+    if(needConvert) {
         entity = getValueFromBCD(entity);
     }
     return entity;
@@ -82,13 +81,13 @@ uint8_t Time::getConvertedTimeEntity(uint8_t reg) {
 
 
 uint8_t Time::getSecond() {
-    return getConvertedTimeEntity(READ_SECONDS_COMMAND);
+    return getConvertedTimeEntity(RTC_SECONDS_REGISTER);
 }
 
 
 
 uint8_t Time::getMinute() {
-    return getConvertedTimeEntity(READ_MINUTES_COMMAND);
+    return getConvertedTimeEntity(RTC_MINUTES_REGISTER);
 }
 
 
@@ -104,11 +103,8 @@ void Time::update(Time& time) {
 
 
 
-
-
-
 uint8_t Time::getHour() {
-    uint8_t hour = getTimeEntity(READ_HOURS_COMMAND);
+    uint8_t hour = getTimeEntity(RTC_HOURS_REGISTER);
     if (needConvert) {
         //hour = getValueFromBCD(hour);
         hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
@@ -122,19 +118,19 @@ uint8_t Time::getHour() {
 
 
 uint8_t Time::getDay() {
-    return getConvertedTimeEntity(READ_DAYS_COMMAND);
+    return getConvertedTimeEntity(RTC_DAYS_REGISTER);
 }
 
 
 
 uint8_t Time::getMonth() {
-    return getConvertedTimeEntity(READ_MONTHS_COMMAND);
+    return getConvertedTimeEntity(RTC_MONTHS_REGISTER);
 }
 
 
 
 uint8_t Time::getYear() {
-    return getConvertedTimeEntity(READ_YEARS_COMMAND);
+    return getConvertedTimeEntity(RTC_YEARS_REGISTER);
 }
 
 
@@ -228,46 +224,115 @@ int8_t Time::getGMT() {
 /*TODO: IMPLEMENT THESE*/
 
 void Time::setTime(const Time& time) {
+    forbidUpdate();
+
     setYear(time.year);
     setMonth(time.month);
     setDay(time.day);
     setHour(time.hour);
     setMinute(time.minute);
     setSecond(time.second);
+
+    allowUpdate();
 }
 
 
 
 void Time::setSecond(uint8_t second) {
-
+    writeConvertedTimeEntity(RTC_SECONDS_REGISTER, second);
 }
 
 
 
 void Time::setMinute(uint8_t minute) {
-
+    writeConvertedTimeEntity(RTC_MINUTES_REGISTER, minute);
 }
 
 
 
 void Time::setHour(uint8_t hour) {
+    /*    uint8_t hour = getTimeEntity(RTC_HOURS_REGISTER);
+    if (needConvert) {
+        //hour = getValueFromBCD(hour);
+        hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
+    }
+    if (isClockFormatWrong && (hour & 0x80)) {
+        hour = (uint8_t) (((hour & 0x7F) + 12) % 24);
+    }
+    return hour;*/
+    if (isClockFormatWrong && (hour > 12)) {
+        hour = (uint8_t) ((((hour & 0x7F) - 12) % 24) | 0x80);
+    }
+    if (needConvert) {
+        //converting to bcd with sign byte
+        hour = (uint8_t) (( (hour % 10)  + (((hour & 0x7F) / 10) << 4) ) | (hour > 12)? (hour & 0x80) : 0);
+    }
 
 }
 
 
 
 void Time::setDay(uint8_t day) {
-
+    writeConvertedTimeEntity(RTC_DAYS_REGISTER, day);
 }
 
 
 
 void Time::setMonth(uint8_t month) {
-
+    writeConvertedTimeEntity(RTC_MONTHS_REGISTER, month);
 }
 
 
 
 void Time::setYear(uint8_t year) {
+    writeConvertedTimeEntity(RTC_YEARS_REGISTER, year);
+}
 
+
+
+void Time::setAlarm(uint8_t hour, uint8_t minute) {
+
+}
+
+
+
+void Time::forbidUpdate() {
+    while(isUpdateInProgress());
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t rtcBRegister = inb(CMOS_DATA_PORT);
+    rtcBRegister |= 128U;
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, rtcBRegister);
+}
+
+
+
+void Time::allowUpdate() {
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t rtcBRegister = inb(CMOS_DATA_PORT);
+    rtcBRegister ^= 128U;
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, rtcBRegister);
+}
+
+
+
+void Time::writeTimeEntity(uint8_t reg, uint8_t value) {
+    outb(CMOS_STATUS_PORT, reg);
+    outb(CMOS_DATA_PORT, value);
+}
+
+
+
+void Time::writeConvertedTimeEntity(uint8_t reg, uint8_t value) {
+    if (needConvert) {
+        value = convertValueToBCD(value);
+    }
+    writeTimeEntity(reg, value);
+}
+
+
+
+uint8_t Time::convertValueToBCD(uint8_t value) {
+    return (uint8_t) ((value % 10) | ((value / 10) << 4));
 }

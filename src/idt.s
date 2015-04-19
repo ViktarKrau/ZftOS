@@ -11,6 +11,19 @@ get_cs:
 
 
 .section .text
+.global get_eip
+.type get_eip, @function
+get_eip:
+		popl	%eax
+		pushl	%eax
+		pushl	%eax
+		ret
+.size get_eip, . - get_eip
+
+
+
+
+.section .text
 .global keyboard_handler
 .type keyboard_handler, @function
 keyboard_handler:

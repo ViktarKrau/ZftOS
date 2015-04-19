@@ -15,6 +15,7 @@ public:
 	void calc();
 	void setGMT();
 	void cowsay();
+	void piano();
 	void printTime();
 	~Shell();
 private:

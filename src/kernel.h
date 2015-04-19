@@ -25,6 +25,8 @@ public:
 	static Scheduler* scheduler;
 	static void cycleWait(uint64_t ticks);
 private:
+	friend void kernel_start(multiboot_info_t* info, uint32_t stack_ptr);
+	void initializeTasking(uint32_t stackPtr);
 	Scheduler __scheduler;
 	Terminal __out;
 	InputStream __in;

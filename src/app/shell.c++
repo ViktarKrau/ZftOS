@@ -5,7 +5,7 @@
 #include "../output/terminalstatebuffer.h"
 #include "clock.h"
 
-const char helptext[] = "\tZunft OS ver. 0.02\n"
+const char helptext[] = "\tZunft OS ver. 0.05\n"
 						"\tList of supported commands\n"
 						"\t\thelp  --  views this message\n"
 						"\t\texit  --  power off\n"
@@ -86,20 +86,13 @@ void Shell::printTime() {
 
 int Shell::run(Vector<char*> args) {
 	Kernel::out->clear();
-	Kernel::out->putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS SHELL!"
+	Kernel::out->putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS ver 0.5 SHELL!"
 						"\nType \"help\" to get list of available commands");
 	printArgs(args);
 	TerminalStateBuffer* terminalStateBuffer = nullptr;
-	//Time::delay(1000);
+
 	printTime();
 	Kernel::out->setStatus("\t\t\t\t\t\t\tSHELL");
-/*	Kernel::out->putsln("");
-	Kernel::out->putsln("\nstrcmp location");
-	Kernel::out->putbytes((uint64_t)strcmp);
-	Kernel::out->putsln("\nOut location");
-	Kernel::out->putbytes((uint64_t)Kernel::out);
-	Kernel::out->puts("\nIN:");
-	Kernel::out->putbytes((uint64_t)Kernel::in);*/
 
 	while (true) {
 		getCommand();
@@ -145,6 +138,9 @@ int Shell::run(Vector<char*> args) {
 				delete terminalStateBuffer;
 				terminalStateBuffer = nullptr;
 			}
+		}
+		else if (!strcmp(buff, "piano")) {
+			piano();
 		}
 		else if (!strcmp(buff, "clock")) {
 			Clock().schedule(0);
@@ -269,4 +265,20 @@ void Shell::cowsay() {
 	Kernel::out->puts("    (__)\\       )\\/\\\n");
 	Kernel::out->puts("        ||----w |\n");
 	Kernel::out->puts("        ||     ||\n");
+}
+
+
+
+void Shell::piano() {
+	const uint32_t notes[] = {261, 294, 330, 350, 392, 440, 494};
+	while (true) {
+		char c = Kernel::in->getchar_nolock();
+		if (c > '0' && c <'8') {
+			Speaker::play(notes[c - '0'], 200);
+
+		}
+		else if (c == 'q') {
+			return;
+		}
+	}
 }

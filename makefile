@@ -1,15 +1,15 @@
-GCC=./compiler/bin/i686-elf-gcc
-GPP=./compiler/bin/i686-elf-g++
-PFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -pedantic -std=c++11 -mno-red-zone
-ASM=./compiler/bin/i686-elf-as
-CFLAGS= -std=gnu99 -ffreestanding  -O2 -Wall -Wextra
-LFLAGS=-ffreestanding -O2 -nostdlib
+GCC = ./compiler/bin/i686-elf-gcc
+GPP = ./compiler/bin/i686-elf-g++
+PFLAGS = -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -pedantic -std=c++11 -mno-red-zone
+ASM = ./compiler/bin/i686-elf-as
+CFLAGS = -std=gnu99 -ffreestanding  -O2 -Wall -Wextra
+LFLAGS = -ffreestanding -O2 -nostdlib
 
 all: assembly cppcompile link
 
 
 
-assembly: boot idt
+assembly: 		boot idt
 boot:
 	$(ASM) src/boot.s -o obj/boot.o
 idt:
@@ -17,14 +17,13 @@ idt:
 
 
 
-cppcompile: common input output memory_f exec app
-app: shell clock
-common: main interrupts kernel string time zft_memory
-output: speaker terminal terminalstatebuffer
-input: enterqueue inputstream
-memory_f: bitmap memory new paging
-exec: executable scheduler
-
+cppcompile: 	common input output memory_f exec app
+app: 				shell clock
+common: 			main interrupts kernel string time zft_memory
+output: 			speaker terminal terminalstatebuffer
+input: 				enterqueue inputstream
+memory_f: 			bitmap memory new paging
+exec: 				executable scheduler
 
 
 main:

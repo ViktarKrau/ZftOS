@@ -52,7 +52,7 @@ private:
     friend void operator delete(void* memory);
     friend void* operator new[](size_t size);
     friend void operator delete[](void* memory);
-    friend void kernel_start(multiboot_info_t* info);
+    friend void kernel_start(multiboot_info_t* info, uint32_t stack_ptr);
 };
 
 

@@ -34,6 +34,7 @@ void Clock::mainMenu() {
                 setTime();
                 break;
             case '3':
+                setAlarm();
                 break;
             case '4':
                 runDelay();
@@ -91,24 +92,44 @@ void Clock::runDelay() {
 void Clock::setTime() {
     Time time;
 
-    Kernel::out->puts("\nEnter two last digits of current year: ");
-    time.year = (uint8_t) Kernel::in->getuint();
 
-    Kernel::out->puts("\nEnter current month: ");
-    time.month = (uint8_t) Kernel::in->getuint();
+    safeRead(time.year, "\nEnter two last digits of current year: ", "\nWrong year, reenter pls", 99);
+    safeRead(time.month, "\nEnter current month: ", "\nWrong month, reenter pls", 12);
+    safeRead(time.day, "\nEnter current day of month: ", "\nWrong day, reenter pls", 31);
+    safeRead(time.hour, "\nEnter current hour: ", "\nWrong hour, reenter plx", 24);
+    safeRead(time.minute, "\nEnter current minute: ", "\nWrong minute, reenter plx", 60);
+    safeRead(time.second, "\nEnter current second: ", "\nWrong second, reenter plx", 60);
 
-    Kernel::out->puts("\nEnter current day of month: ");
-    time.day = (uint8_t) Kernel::in->getuint();
-
-    Kernel::out->puts("\nEnter current hour: ");
-    time.hour = (uint8_t) Kernel::in->getuint();
-
-    Kernel::out->puts("\nEnter current minute: ");
-    time.minute = (uint8_t) Kernel::in->getuint();
-
-    Kernel::out->puts("\nEnter current second: ");
-    time.second = (uint8_t) Kernel::in->getuint();
-
-    Kernel::out->puts("Time is set to: \n");
+    Time::setTime(time);
+    Kernel::out->puts("\nTime is set to: \n");
     printTime();
+}
+
+
+
+void Clock::safeRead(uint8_t& param, const char* enterInvite, const char* errorMessage, uint8_t upperBound) {
+    while (true) {
+        Kernel::out->puts(enterInvite);
+        param = (uint8_t) Kernel::in->getuint();
+        if (param > upperBound) {
+            Kernel::out->puts(errorMessage);
+        }
+        else {
+            break;
+        }
+    }
+}
+
+
+
+void Clock::setAlarm() {
+    uint8_t hour;
+    uint8_t minute;
+    safeRead(hour, "\nEnter alarm hour: ", "\nWrong hour, reenter plx", 24);
+    safeRead(minute, "\nEnter alarm minute: ", "\nWrong minute, reenter plx", 60);
+    Time::setAlarm(hour, minute);
+    Kernel::out->puts("\nAlarm is set to ");
+    Kernel::out->putuint(hour);
+    Kernel::out->putchar(':');
+    Kernel::out->putuint(minute);
 }

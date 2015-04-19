@@ -15,6 +15,8 @@ private:
     void mainMenu();
     void runDelay();
     void setTime();
+    void setAlarm();
+    void safeRead(uint8_t &param, const char *enterInvite, const char *errorMessage, uint8_t upperBound);
     void printTime();
 };
 

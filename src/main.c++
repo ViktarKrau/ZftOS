@@ -13,7 +13,7 @@
 
 
 
-void kernel_start(multiboot_info_t* info){
+void kernel_start(multiboot_info_t* info, uint32_t stack_ptr) {
 	disable_interrupts();
 	initialize_idt();
 	unmask_interrupts();
@@ -23,6 +23,7 @@ void kernel_start(multiboot_info_t* info){
 	Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
 	//Paging::initialize(info->mem_upper);
 	Kernel kernel(info);
+	//kernel.initializeTasking(stack_ptr);
 	kernel.run();
 
 }
@@ -32,7 +33,7 @@ void kernel_start(multiboot_info_t* info){
 #if defined(__cplusplus)
 extern "C"
 #endif
-void kernel_main(multiboot_info_t* mbd, uint32_t stack_ptr){
-	kernel_start(mbd);
+void kernel_main(multiboot_info_t* mbd , uint32_t stack_ptr) {
+	kernel_start(mbd, stack_ptr);
 
 }
