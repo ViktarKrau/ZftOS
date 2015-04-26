@@ -21,7 +21,13 @@ get_eip:
 .size get_eip, . - get_eip
 
 
-
+.section .text
+.global cmos_alarm_handler
+.type cmos_alarm_handler, @function
+cmos_alarm_handler:
+		call cmos_alarm_handler_c
+		iret
+.size cmos_alarm_handler, . - cmos_alarm_handler
 
 .section .text
 .global keyboard_handler

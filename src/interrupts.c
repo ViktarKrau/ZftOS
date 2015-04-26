@@ -27,11 +27,14 @@
 #define TIMER_ZERO_CHANNEL_PORT 0x40
 #define KEYBOARD_INTERRUPT_ENTRY_NUMBER 0x21
 #define TIMER_INTERRUPT_ENTRY_NUMBER 0x20
+#define CMOS_INTERRUPT_ENTRY_NUMBER 0x28
 #define PAGE_FAULT_INTERRUPT_ENTRY_NUMBER 0xE
 #define INTERRUPT_GATE 0x8E
 #define FULL_MASK 0xFF
 #define UNMASK_TIMER_INTERRUPT 0xFE
 #define UNMASK_KEYBOARD_INTERRUPT 0xFD
+#define UNMASK_SLAVE_INTERRUPT 0xFB
+#define UNMASK_RTC_INTERRUPT 0xFE
 #define GET_LOWER_WORD(x) (x & 0xFFFF)
 #define GET_HIGHER_WORD(x) ((x & 0xffff0000) >> 16)
 #define IS_LOWEST_BIT_SET(x) (x & 0x1)
@@ -47,6 +50,7 @@ struct IDTDescr IDT[IDT_SIZE];
 
 extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
+extern "C"  void cmos_alarm_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
 void switchTasks();
 
@@ -68,8 +72,19 @@ void keyboard_handler_c() {
 
 
 extern "C"
+void cmos_alarm_handler_c() {
+	WRITE_EOI();
+	timeAlarm();
+	outb(0x70, 0x0C);
+	inb(0x71);				// just throw away contents
+}
+
+
+
+extern "C"
 void page_fault_handler() {
 	*(char*)(0xB8000) = 'A';
+	WRITE_EOI();
 }
 
 
@@ -122,7 +137,7 @@ void initialize_idt() {
 	make_idt_entry(IDT + KEYBOARD_INTERRUPT_ENTRY_NUMBER, keyboard_handler, (uint16_t)__cs, INTERRUPT_GATE);
 	make_idt_entry(IDT + TIMER_INTERRUPT_ENTRY_NUMBER, timer_handler, (uint16_t)__cs, INTERRUPT_GATE);
 	make_idt_entry(IDT + PAGE_FAULT_INTERRUPT_ENTRY_NUMBER, page_fault_handler, (uint16_t)__cs, INTERRUPT_GATE);
-
+	make_idt_entry(IDT + CMOS_INTERRUPT_ENTRY_NUMBER, cmos_alarm_handler, (uint16_t)__cs, INTERRUPT_GATE);
 
 	idt_address = (uint32_t)&IDT;
 	idt_ptr[0] = (uint32_t) ((sizeof (struct IDTDescr) * IDT_SIZE)
@@ -150,13 +165,16 @@ void initialize_idt() {
 	/*Masks*/
 	outb(PIC_MASTER_DATA_PORT, FULL_MASK);
 	outb(PIS_SLAVE_DATA_PORT, FULL_MASK);
-
-
 }
 
 
 
 extern "C"
 void unmask_interrupts(){
-	outb(PIC_MASTER_DATA_PORT, FULL_MASK & UNMASK_KEYBOARD_INTERRUPT & UNMASK_TIMER_INTERRUPT);
+	outb(PIC_MASTER_DATA_PORT,
+		 FULL_MASK
+		 & UNMASK_KEYBOARD_INTERRUPT
+		 & UNMASK_TIMER_INTERRUPT
+		 & UNMASK_SLAVE_INTERRUPT);
+	outb(PIS_SLAVE_DATA_PORT, FULL_MASK & UNMASK_RTC_INTERRUPT);
 }

@@ -4,6 +4,7 @@
 #include "../output/speaker.h"
 #include "../output/terminalstatebuffer.h"
 #include "clock.h"
+#include "../interrupts.h"
 
 const char helptext[] = "\tZunft OS ver. 0.05\n"
 						"\tList of supported commands\n"
@@ -144,6 +145,9 @@ int Shell::run(Vector<char*> args) {
 		}
 		else if (!strcmp(buff, "clock")) {
 			Clock().schedule(0);
+		}
+		else if (!strcmp(buff, "alarm")) {
+			timeAlarm();
 		}
 		else {
 			Kernel::out.puts("Command invalid");

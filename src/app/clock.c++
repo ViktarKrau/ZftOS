@@ -2,6 +2,7 @@
 #include "../kernel.h"
 
 
+#define ALARM_MESSAGE_BUFFER_SIZE 64
 int Clock::run(Vector<char*> args) {
     Kernel::out << "IN CLOCK RUN()"<< "\n";
     Kernel::out.setStatus("\t\t\t\t\t CLOCK");
@@ -26,7 +27,9 @@ void Clock::mainMenu() {
                                   "\t\t2. Set time\n"
                                   "\t\t3. Set alarm\n"
                                   "\t\t4. Delay(ms)\n"
-                                  "\t\t5. Quit\n");
+                                  "\t\t5. View alarm time\n"
+                                  "\t\t6. Turn off alarm\n"
+                                  "\t\t7. Quit\n");
         switch (Kernel::in.getchar()) {
             case '1':
                 printTime();
@@ -41,6 +44,15 @@ void Clock::mainMenu() {
                 runDelay();
                 break;
             case '5':
+                Kernel::out << "\n" << Time::getAlarmHour()
+                << ":" << Time::getAlarmMinute() << ":" << Time::getAlarmSecond();
+                Kernel::out << ((Time::isAlarmSet())? "\nalarm is set" : "alarm is not set");
+                break;
+            case '6':
+                Kernel::out << "Alarm is not set now";
+                Time::turnOffAlarm();
+                break;
+            case '7':
                 return;
             default:
                 Kernel::out.puts("Wrong key\n");
@@ -94,12 +106,12 @@ void Clock::setTime() {
     Time time;
 
 
-    safeRead(time.year, "\nEnter two last digits of current year: ", "\nWrong year, reenter pls", 99);
-    safeRead(time.month, "\nEnter current month: ", "\nWrong month, reenter pls", 12);
-    safeRead(time.day, "\nEnter current day of month: ", "\nWrong day, reenter pls", 31);
-    safeRead(time.hour, "\nEnter current hour: ", "\nWrong hour, reenter plx", 24);
-    safeRead(time.minute, "\nEnter current minute: ", "\nWrong minute, reenter plx", 60);
-    safeRead(time.second, "\nEnter current second: ", "\nWrong second, reenter plx", 60);
+    safeRead(time.year, "\nEnter two last digits of current year: ", "\nWrong year, reenter pls", 99, true);
+    safeRead(time.month, "\nEnter current month: ", "\nWrong month, reenter pls", 12, false);
+    safeRead(time.day, "\nEnter current day of month: ", "\nWrong day, reenter pls", 31, false);
+    safeRead(time.hour, "\nEnter current hour: ", "\nWrong hour, reenter plx", 24, true);
+    safeRead(time.minute, "\nEnter current minute: ", "\nWrong minute, reenter plx", 60, true);
+    safeRead(time.second, "\nEnter current second: ", "\nWrong second, reenter plx", 60, true);
 
     Time::setTime(time);
     Kernel::out.puts("\nTime is set to: \n");
@@ -108,11 +120,12 @@ void Clock::setTime() {
 
 
 
-void Clock::safeRead(uint8_t& param, const char* enterInvite, const char* errorMessage, uint8_t upperBound) {
+void Clock::safeRead(uint8_t& param, const char* enterInvite
+        , const char* errorMessage, uint8_t upperBound, bool canBeZero) {
     while (true) {
         Kernel::out.puts(enterInvite);
         param = (uint8_t) Kernel::in.getuint();
-        if (param > upperBound) {
+        if (param > upperBound || (!canBeZero && param == 0)) {
             Kernel::out.puts(errorMessage);
         }
         else {
@@ -126,11 +139,23 @@ void Clock::safeRead(uint8_t& param, const char* enterInvite, const char* errorM
 void Clock::setAlarm() {
     uint8_t hour;
     uint8_t minute;
-    safeRead(hour, "\nEnter alarm hour: ", "\nWrong hour, reenter plx", 24);
-    safeRead(minute, "\nEnter alarm minute: ", "\nWrong minute, reenter plx", 60);
-    Time::setAlarm(hour, minute);
+    uint8_t second;
+    safeRead(hour, "\nEnter alarm hour: ", "\nWrong hour, reenter plx", 24, true);
+    safeRead(minute, "\nEnter alarm minute: ", "\nWrong minute, reenter plx", 60, true);
+    safeRead(second, "\nEnter alarm second: ", "\nWrong second, reenter plx", 60, true);
+
+    char buffer[ALARM_MESSAGE_BUFFER_SIZE];
+    Kernel::out << "\nEnter alarm message: ";
+    Kernel::in.gets(buffer, ALARM_MESSAGE_BUFFER_SIZE);
+
+    Kernel::out << "\nBlock?(Y/N)";
+    char c = Kernel::in.getchar();
+
+    Time::setAlarm(hour, minute, second, buffer, (c == 'y'));
     Kernel::out.puts("\nAlarm is set to ");
-    Kernel::out.putuint(hour);
+    Kernel::out.putuint(Time::getAlarmHour());
     Kernel::out.putchar(':');
-    Kernel::out.putuint(minute);
+    Kernel::out.putuint(Time::getAlarmMinute());
+    Kernel::out.puts(":");
+    Kernel::out.putuint(Time::getAlarmSecond());
 }

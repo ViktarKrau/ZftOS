@@ -1,4 +1,5 @@
-#include <stdint-gcc.h>
+#include "zftdef.h"
+#include "string.h"
 #include "time.h"
 #include "iob.h"
 #include "kernel.h"
@@ -13,15 +14,23 @@
 #define BCD_CLOCK_FORMAT_FLAG 0x04
 #define UPDATE_IN_PROGRESS_FLAG 0x80
 #define RTC_SECONDS_REGISTER 0x00
+#define RTC_SECONDS_ALARM_REGISTER 0x01
 #define RTC_MINUTES_REGISTER 0x02
+#define RTC_MINUTES_ALARM_REGISTER 0X03
 #define RTC_HOURS_REGISTER 0x04
+#define RTC_HOURS_ALARM_REGISTER 0X05
 #define RTC_DAYS_REGISTER 0x07
 #define RTC_MONTHS_REGISTER 0x08
 #define RTC_YEARS_REGISTER 0x09
+/*5th bit set*/
+#define RTC_ENABLE_ALARM (0x01 << 5)
+#define ALARM_TIMEOUT 5000
 
 
 
+char* Time::alarmMessageBuffer;
 bool Time::needConvert;
+bool Time::doesAlarmBlock = true;
 bool Time::isClockFormatWrong;
 int8_t Time::GMT;
 volatile uint64_t Time::milliseconds;
@@ -29,7 +38,7 @@ volatile uint64_t Time::milliseconds;
 
 void Time::initialize() {
     milliseconds = 0;
-    GMT = 3;
+    GMT = 0;
     needConvert = !((bool) (getRTCRegister(RTC_B_REGISTER) & BCD_CLOCK_FORMAT_FLAG));
     isClockFormatWrong = (bool) (getRTCRegister(RTC_B_REGISTER) & HOUR_FORMAT_FLAG);
 }
@@ -105,13 +114,7 @@ void Time::update(Time& time) {
 
 uint8_t Time::getHour() {
     uint8_t hour = getTimeEntity(RTC_HOURS_REGISTER);
-    if (needConvert) {
-        //hour = getValueFromBCD(hour);
-        hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
-    }
-    if (isClockFormatWrong && (hour & 0x80)) {
-        hour = (uint8_t) (((hour & 0x7F) + 12) % 24);
-    }
+    hour = convertReadHour(hour);
     return hour;
 }
 
@@ -221,7 +224,7 @@ int8_t Time::getGMT() {
     return GMT;
 }
 
-/*TODO: IMPLEMENT THESE*/
+
 
 void Time::setTime(const Time& time) {
     forbidUpdate();
@@ -251,23 +254,8 @@ void Time::setMinute(uint8_t minute) {
 
 
 void Time::setHour(uint8_t hour) {
-    /*    uint8_t hour = getTimeEntity(RTC_HOURS_REGISTER);
-    if (needConvert) {
-        //hour = getValueFromBCD(hour);
-        hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
-    }
-    if (isClockFormatWrong && (hour & 0x80)) {
-        hour = (uint8_t) (((hour & 0x7F) + 12) % 24);
-    }
-    return hour;*/
-    if (isClockFormatWrong && (hour > 12)) {
-        hour = (uint8_t) ((((hour & 0x7F) - 12) % 24) | 0x80);
-    }
-    if (needConvert) {
-        //converting to bcd with sign byte
-        hour = (uint8_t) (( (hour % 10)  + (((hour & 0x7F) / 10) << 4) ) | (hour > 12)? (hour & 0x80) : 0);
-    }
-
+    hour = convertHourToWrite(hour);
+    writeTimeEntity(RTC_HOURS_REGISTER, hour);
 }
 
 
@@ -290,8 +278,20 @@ void Time::setYear(uint8_t year) {
 
 
 
-void Time::setAlarm(uint8_t hour, uint8_t minute) {
-
+void Time::setAlarm(uint8_t hour, uint8_t minute, uint8_t second
+        , const char* message, bool block) {
+    writeConvertedTimeEntity(RTC_SECONDS_ALARM_REGISTER, second);
+    writeConvertedTimeEntity(RTC_MINUTES_ALARM_REGISTER, minute);
+    hour = convertHourToWrite(hour);
+    writeTimeEntity(RTC_HOURS_ALARM_REGISTER, hour);
+    alarmMessageBuffer = new char[strlen(message) + 1];
+    size_t i;
+    for (i = 0; message[i]; ++i) {
+        alarmMessageBuffer[i] = message[i];
+    }
+    alarmMessageBuffer[i] = '\0';
+    doesAlarmBlock = block;
+    turnOnAlarm();
 }
 
 
@@ -335,4 +335,92 @@ void Time::writeConvertedTimeEntity(uint8_t reg, uint8_t value) {
 
 uint8_t Time::convertValueToBCD(uint8_t value) {
     return (uint8_t) ((value % 10) | ((value / 10) << 4));
+}
+
+
+
+void timeAlarm() {
+    if (Time::alarmMessageBuffer == nullptr) {
+        return;
+    }
+    if (Time::doesAlarmBlock) {
+        Kernel::out.alarm(Time::alarmMessageBuffer, ALARM_TIMEOUT);
+    }
+    else {
+        Kernel::out << "\nALARM:\n" << Time::alarmMessageBuffer << "\n";
+    }
+    delete Time::alarmMessageBuffer;
+    Time::alarmMessageBuffer = nullptr;
+}
+
+
+
+uint8_t Time::convertHourToWrite(uint8_t hour) {
+    if (needConvert) {
+        hour = convertValueToBCD(hour);
+    }
+    if (!isClockFormatWrong) {
+        if (hour > 12) {
+            hour = (uint8_t) ((hour - 12) | 80);
+        }
+    }
+    return hour;
+}
+
+
+
+uint8_t Time::convertReadHour(uint8_t hour) {
+    if (needConvert) {
+        //hour = getValueFromBCD(hour);
+        hour = (uint8_t) (( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80));
+    }
+    if (isClockFormatWrong && (hour & 0x80)) {
+        hour = (uint8_t) (((hour & 0x7F) + 12) % 24);
+    }
+    return hour;
+}
+
+
+
+void Time::turnOnAlarm() {
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t bReg = inb(CMOS_DATA_PORT);
+    bReg |= RTC_ENABLE_ALARM;
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, bReg);
+}
+
+
+
+void Time::turnOffAlarm() {
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t bReg = inb(CMOS_DATA_PORT);
+    bReg = (uint8_t) ((bReg | RTC_ENABLE_ALARM) ^ RTC_ENABLE_ALARM);
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, bReg);
+}
+
+
+
+uint8_t Time::getAlarmSecond() {
+    return getConvertedTimeEntity(RTC_SECONDS_ALARM_REGISTER);
+}
+
+
+
+uint8_t Time::getAlarmMinute() {
+    return getConvertedTimeEntity(RTC_MINUTES_ALARM_REGISTER);
+}
+
+
+
+uint8_t Time::getAlarmHour() {
+    return getConvertedTimeEntity(RTC_HOURS_ALARM_REGISTER);
+}
+
+
+
+bool Time::isAlarmSet() {
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    return (bool) (inb(CMOS_DATA_PORT) & RTC_ENABLE_ALARM);
 }

@@ -9,7 +9,7 @@ Executable::Executable(bool _screenNeeded) {
     isNewScreenNeeded = _screenNeeded;
     registers.ebp = 0;
     registers.eip = 0;
-    registers.esp;
+    registers.esp = 0;
 }
 
 

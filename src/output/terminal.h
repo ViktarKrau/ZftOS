@@ -77,9 +77,11 @@ public:
 	Terminal& operator<<(char ch);
 	Terminal& operator<<(int64_t value);
 	Terminal& operator<<(uint64_t value);
+	Terminal& operator<<(uint8_t value);
 	void putuint(uint64_t value);
 	void puthex(uint64_t value);
 	void putbytes(uint64_t value);
+	void alarm(const char* , uint64_t millisecTimeout = 0);
 	static ColorByte makeColor(TerminalColor foreground, TerminalColor background);
 	size_t getPosition();
 	ColorByte getColor();

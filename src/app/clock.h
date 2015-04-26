@@ -16,7 +16,8 @@ private:
     void runDelay();
     void setTime();
     void setAlarm();
-    void safeRead(uint8_t &param, const char *enterInvite, const char *errorMessage, uint8_t upperBound);
+    void safeRead(uint8_t& param, const char* enterInvite, const char* errorMessage
+            , uint8_t upperBound, bool canBeZero);
     void printTime();
 };
 

@@ -9,13 +9,13 @@ void* operator new (size_t length) throw() {
 
 
 
-void* operator new (size_t length, void* startAddress) {
+void* operator new (size_t length __attribute__((unused)), void* startAddress) {
     return startAddress;
 }
 
 
 
-void* operator new[] (size_t length, void* startAddress) {
+void* operator new[] (size_t length __attribute__((unused)), void* startAddress) {
     return startAddress;
 }
 

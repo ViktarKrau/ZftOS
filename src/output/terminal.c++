@@ -3,9 +3,7 @@
 #include "../zft_memory.h"
 #include "../string.h"
 #include "terminalstatebuffer.h"
-
-
-
+#include "speaker.h"
 
 
 Terminal::Terminal() {
@@ -333,4 +331,33 @@ int64_t Terminal::getLocation() {
 Terminal& Terminal::operator<<(uint64_t value) {
 	putuint(value);
 	return *this;
+}
+
+
+
+void Terminal::alarm(const char* message, uint64_t millisecTimeout) {
+	TerminalStateBuffer buffer(*this);
+	for (size_t i = 20; i < 60; ++i) {
+		for (size_t j = 7; j < 12; ++j) {
+			putColoredCharAtPos(' ', makeColor(COLOR_BLACK, COLOR_DARK_GREY), i, j);
+		}
+	}
+	if (message != nullptr) {
+		for (size_t i = 0; message[i] != '\0'; ++i) {
+			putColoredCharAtPos(message[i], makeColor(COLOR_CYAN, COLOR_DARK_GREY), i + 25, 9);
+		}
+	}
+	if (millisecTimeout == 0) {
+		Speaker::playWithKeyboradBlock(400);
+	}
+	else {
+		Speaker::playWithKeyboardBlock(400, millisecTimeout);
+	}
+	buffer.loadTo(this);
+}
+
+
+
+Terminal& Terminal::operator<<(uint8_t value) {
+	return *this << (uint64_t)value;
 }

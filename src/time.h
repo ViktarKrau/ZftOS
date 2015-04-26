@@ -1,7 +1,10 @@
 #include "zftdef.h"
 
+
+
 #ifndef _ZFTOS_DEV_TIME_H
 #define _ZFTOS_DEV_TIME_H
+
 
 
 class Time {
@@ -27,11 +30,22 @@ public:
     static uint8_t getYear();
     static int8_t getGMT();
     static void setTime(const Time& time);
-    static void setAlarm(uint8_t hour, uint8_t minute);
+    static void setAlarm(uint8_t hour, uint8_t minute, uint8_t second, const char* message = "ALARM!!!", bool block = true);
     static void setGMT(int8_t value);
     friend void timerTick();
+    friend void timeAlarm();
     static uint64_t getMilliseconds();
+    static void turnOffAlarm();
+    static uint8_t getAlarmSecond();
+    static uint8_t getAlarmMinute();
+    static uint8_t getAlarmHour();
+    static bool isAlarmSet();
 private:
+    static bool doesAlarmBlock;
+    static char* alarmMessageBuffer;
+    static void turnOnAlarm();
+    static uint8_t convertHourToWrite(uint8_t hour);
+    static uint8_t convertReadHour(uint8_t hour);
     static void setSecond(uint8_t second);
     static void setMinute(uint8_t minute);
     static void setHour(uint8_t hour);
