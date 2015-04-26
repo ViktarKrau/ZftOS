@@ -147,7 +147,7 @@ int Shell::run(Vector<char*> args) {
 			Clock().schedule(0);
 		}
 		else if (!strcmp(buff, "alarm")) {
-			timeAlarm();
+			Kernel::out.alarm("ALARM", 0);
 		}
 		else {
 			Kernel::out.puts("Command invalid");

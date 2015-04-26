@@ -12,6 +12,7 @@ public:
     void set(size_t pos);
     void reset(size_t pos);
     void setval(size_t pos, bool value);
+    uint32_t firstZero();
     ~Bitmap();
 private:
     byte_ptr_t map;

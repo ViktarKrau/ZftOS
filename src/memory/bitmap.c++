@@ -62,3 +62,21 @@ Bitmap::~Bitmap() {
         delete map;
     }
 }
+
+
+
+uint32_t Bitmap::firstZero() {
+    byte_ptr_t tempMap = map;
+    for (size_t i = 0; i < bitmapLength; ++i) {
+        if (*tempMap != 0xFF) {
+            for (size_t j = 0; j < BYTE_BITS_COUNT; ++j) {
+                byte_t testbit = (byte_t) (0x1 << j);
+                if (!(*tempMap & testbit)) {
+                    return (uint32_t) (i * 8 + j);
+                }
+            }
+        }
+        tempMap++;
+    }
+    return (uint32_t)-1;
+}

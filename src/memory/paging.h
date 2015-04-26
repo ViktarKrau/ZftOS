@@ -55,10 +55,12 @@ private:
     size_t pagesCount;
     Bitmap pagesMap;
     PageDirectory* kernelDirectory;
-    void assignPage(uint32_t startAddress);
-    void* getPage();
-    uint32_t usedPages;
     PageDirectory* userspaceDirectory;
+    PageDirectory* currentDirectory;
+    Page* getPage(uint32_t startAddress);
+    void allocateFrame(Page* page, bool isWritable, bool isKernel);
+    void setDirectory(PageDirectory* directory);
+    uint32_t usedPages;
 };
 
 void initialize_paging();

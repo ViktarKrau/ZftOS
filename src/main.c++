@@ -20,7 +20,7 @@ void kernel_start(multiboot_info_t* info, uint32_t stack_ptr) {
 	initialize_timer();
 	Time::initialize();
 	Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
-	//Paging::initialize(info->mem_upper);
+	Paging::initialize(info->mem_upper);
 	Kernel kernel(info);
 	kernel.initializeTasking(stack_ptr);
 	enable_interrupts();
