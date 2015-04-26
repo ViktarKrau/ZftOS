@@ -22,14 +22,14 @@ int DisplayClock::run(Vector<char*> args) {
         putTimeEntity(time.hour, ':', 69);
         putTimeEntity(time.minute, ':', 72);
         putTimeEntity(time.second, ' ', 75);
-        Kernel::scheduler->passControl();
+        Kernel::scheduler.passControl();
     }
 }
 
 
 
 void DisplayClock::putTimeChar(char timeChar, size_t x) {
-    Kernel::out->putColoredCharAtPos(timeChar
+    Kernel::out.putColoredCharAtPos(timeChar
             , Terminal::makeColor(TerminalColor::COLOR_BLUE, TerminalColor::COLOR_LIGHT_GREY)
             , x, 0);
 }

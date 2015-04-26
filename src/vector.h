@@ -63,7 +63,7 @@ template<class T>
 Vector<T>::Vector() {
     _capacity = 0;
     _size = 0;
-    buffer = 0;
+    buffer = nullptr;
 }
 
 
@@ -89,6 +89,8 @@ Vector<T>::Vector(unsigned int size) {
     else {
         buffer = nullptr;
     }
+    _capacity = size;
+    _size = size;
 }
 
 

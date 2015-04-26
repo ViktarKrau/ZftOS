@@ -9,8 +9,22 @@ void* operator new (size_t length) throw() {
 
 
 
+void* operator new (size_t length, void* startAddress) {
+    return startAddress;
+}
+
+
+
+void* operator new[] (size_t length, void* startAddress) {
+    return startAddress;
+}
+
+
+
 void operator delete (void* memory) {
-    Memory::freeBlock((size_t*)memory);
+    if (memory != nullptr) {
+        Memory::freeBlock((size_t*)memory);
+    }
 }
 
 
@@ -22,5 +36,7 @@ void* operator new[] (size_t count) throw() {
 
 
 void operator delete[] (void* memory) {
-    Memory::freeBlock((size_t*)memory);
+    if (memory != nullptr) {
+        Memory::freeBlock((size_t*) memory);
+    }
 }

@@ -3,9 +3,14 @@
 #include "../kernel.h"
 
 
+
 void Scheduler::createTask(Executable* task) {
     disable_interrupts();
-    size_t i = 0;
+
+    uint32_t i = 0;
+
+
+
     for ( ; i < tasks.size(); ++i) {
         if (tasks[i] == nullptr) {
             tasks[i] = task;
@@ -16,7 +21,7 @@ void Scheduler::createTask(Executable* task) {
         task->pid = tasks.size();
         tasks.push_back(task);
     }
-    switchToNextTask();
+    //switchToNextTask();
     enable_interrupts();
 }
 
@@ -28,7 +33,7 @@ void Scheduler::removeTask(Executable* task) {
         tasks[task->pid] = nullptr;
     }
     else {
-        Kernel::out->puts("ERROR");
+        Kernel::out.puts("ERROR");
         return;
     }
     switchToNextTask();
@@ -68,11 +73,11 @@ Executable* Scheduler::getNextTask() {
 
 
 void switchTasks() {
-    if (!Kernel::scheduler->isControlPassed) {
-        Kernel::scheduler->switchToNextTask();
+    if (!Kernel::scheduler.isControlPassed) {
+        Kernel::scheduler.switchToNextTask();
     }
     else {
-        Kernel::scheduler->isControlPassed = false;
+        Kernel::scheduler.isControlPassed = false;
     }
 }
 
@@ -81,4 +86,15 @@ void switchTasks() {
 void Scheduler::passControl() {
     switchToNextTask();
     isControlPassed = true;
+}
+
+
+
+Scheduler::Scheduler() {
+}
+
+
+
+int64_t Scheduler::getLocation() {
+    return (int64_t)this;
 }

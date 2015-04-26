@@ -62,3 +62,22 @@ void TerminalStateBuffer::empty() {
     color = 0;
     column = 0;
 }
+
+
+
+void TerminalStateBuffer::saveFrom(Terminal& terminal) {
+    screen = new uint16_t[VGA_HEIGHT * VGA_WIDTH];
+    memcpy((void*)screen, (void*)(VGA_START_ADDRESS), VGA_HEIGHT * VGA_WIDTH * 2);
+    for (size_t i = 0; i < NUMBER_BUFF_SIZE; ++i) {
+        numberBuff[i] = terminal.numberBuff[i];
+    }
+    column = terminal.column;
+    row = terminal.row;
+    color = terminal.color;
+}
+
+
+
+TerminalStateBuffer::TerminalStateBuffer(Terminal& terminal) {
+    saveFrom(terminal);
+}

@@ -81,7 +81,7 @@ void InputStream::gets(char* buffer, size_t size) {
 		if (c == '\n') {
 			buffer[index] = 0;
 			if(!is_empty(buffer)) {
-				Kernel::out->newLine();
+				Kernel::out.newLine();
 				return;
 			}
 			else {
@@ -92,13 +92,13 @@ void InputStream::gets(char* buffer, size_t size) {
 			if (index) {
 				buffer[index] = 0;
 				index--;
-				Kernel::out->putchar('\b');
+				Kernel::out.putchar('\b');
 			}
 		}
 		else {
 			if (index < size - 1) {
 				buffer[index++] = c;
-				Kernel::out->putchar(c);
+				Kernel::out.putchar(c);
 			}
 		}
 	}
@@ -123,13 +123,13 @@ void InputStream::getWord(char *buffer, size_t size) {
 			if (index) {
 				buffer[index] = 0;
 				index--;
-				Kernel::out->putchar('\b');
+				Kernel::out.putchar('\b');
 			}
 		}
 		else {
 			if (index < size - 1) {
 				buffer[index++] = c;
-				Kernel::out->putchar(c);
+				Kernel::out.putchar(c);
 			}
 		}
 	}
@@ -152,4 +152,8 @@ uint64_t InputStream::getuint() {
 
 void InputStream::flush() {
 	EnterQueue::flush();
+}
+
+int64_t InputStream::getLocation() {
+	return (int64_t)this;
 }

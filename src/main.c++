@@ -9,7 +9,7 @@
 
 
 
-#define MEMORY_START (2 << 20)
+#define MEMORY_START ((2 << 20) + sizeof(Terminal) + sizeof(Scheduler) + sizeof(InputStream))
 
 
 
@@ -18,12 +18,12 @@ void kernel_start(multiboot_info_t* info, uint32_t stack_ptr) {
 	initialize_idt();
 	unmask_interrupts();
 	initialize_timer();
-	enable_interrupts();
 	Time::initialize();
 	Memory::initialize((size_t*)MEMORY_START, info->mem_upper);
 	//Paging::initialize(info->mem_upper);
 	Kernel kernel(info);
-	//kernel.initializeTasking(stack_ptr);
+	kernel.initializeTasking(stack_ptr);
+	enable_interrupts();
 	kernel.run();
 
 }

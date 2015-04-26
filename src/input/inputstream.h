@@ -25,6 +25,7 @@ public:
 	uint8_t getkey_nolock();
 	char getchar_nolock();
 	void flush();
+	int64_t getLocation();
 	~InputStream();
 private:
 	char buffer[NUMBER_BUFFER_SIZE];

@@ -33,14 +33,14 @@ Shell::~Shell() {
 
 
 void Shell::getCommand() {
-	Kernel::out->puts("\n > ");
+	Kernel::out.puts("\n > ");
 	size_t index = 0;
 	while (true) {
-		char c = Kernel::in->getchar();
+		char c = Kernel::in.getchar();
 		if (c == '\n') {
 			buff[index] = 0;
 			if (!is_empty(buff)) {
-				Kernel::out->newLine();
+				Kernel::out.newLine();
 				return;
 			}
 			else {
@@ -51,13 +51,13 @@ void Shell::getCommand() {
 			if (index) {
 				buff[index] = 0;
 				index--;
-				Kernel::out->putchar('\b');
+				Kernel::out.putchar('\b');
 			}
 		}
 		else {
 			if (index < 59) {
 				buff[index++] = c;
-				Kernel::out->putchar(c);
+				Kernel::out.putchar(c);
 			}
 		}
 	}
@@ -67,37 +67,37 @@ void Shell::getCommand() {
 
 void Shell::printTime() {
 	Time time = Time::getCurrentTime();
-	Kernel::out->puts("Time: ");
-	Kernel::out->putuint(time.day);
-	Kernel::out->putchar('.');
-	Kernel::out->putuint(time.month);
-	Kernel::out->putchar('.');
-	Kernel::out->putuint(time.year + 2000);
-	Kernel::out->putchar(' ');
-	Kernel::out->putuint(time.hour);
-	Kernel::out->putchar(':');
-	Kernel::out->putuint(time.minute);
-	Kernel::out->putchar(':');
-	Kernel::out->putuint(time.second);
+	Kernel::out.puts("Time: ");
+	Kernel::out.putuint(time.day);
+	Kernel::out.putchar('.');
+	Kernel::out.putuint(time.month);
+	Kernel::out.putchar('.');
+	Kernel::out.putuint(time.year + 2000);
+	Kernel::out.putchar(' ');
+	Kernel::out.putuint(time.hour);
+	Kernel::out.putchar(':');
+	Kernel::out.putuint(time.minute);
+	Kernel::out.putchar(':');
+	Kernel::out.putuint(time.second);
 
 }
 
 
 
 int Shell::run(Vector<char*> args) {
-	Kernel::out->clear();
-	Kernel::out->putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS ver 0.5 SHELL!"
+	Kernel::out.clear();
+	Kernel::out.putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS ver 0.5 SHELL!"
 						"\nType \"help\" to get list of available commands");
 	printArgs(args);
 	TerminalStateBuffer* terminalStateBuffer = nullptr;
 
 	printTime();
-	Kernel::out->setStatus("\t\t\t\t\t\t\tSHELL");
+	Kernel::out.setStatus("\t\t\t\t\t\t\tSHELL");
 
 	while (true) {
 		getCommand();
 		if (!strcmp(buff, "help")) {
-			Kernel::out->putsln(helptext);
+			Kernel::out.putsln(helptext);
 		}
 		else if (!strcmp(buff, "exit")) {
 			Kernel::exit(Kernel::SHUTDOWN);
@@ -106,13 +106,13 @@ int Shell::run(Vector<char*> args) {
 			Kernel::exit(Kernel::REBOOT);
 		}
 		else if (!strcmp(buff, "color")) {
-			Kernel::out->setColor((ColorByte) (Kernel::out->getColor() + 1));
-			Kernel::out->redraw();
+			Kernel::out.setColor((ColorByte) (Kernel::out.getColor() + 1));
+			Kernel::out.redraw();
 		}
 		else if (!strcmp(buff, "time")) {
-			Kernel::out->putchar('\n');
+			Kernel::out.putchar('\n');
 			printTime();
-			Kernel::out->putchar('\n');
+			Kernel::out.putchar('\n');
 		}
 		else if (!strcmp(buff, "alloctest")) {
 			runMemTest();
@@ -134,7 +134,7 @@ int Shell::run(Vector<char*> args) {
 		}
 		else if (!strcmp(buff, "load")) {
 			if (terminalStateBuffer != nullptr) {
-				Kernel::out->restoreFromBuffer(terminalStateBuffer);
+				Kernel::out.restoreFromBuffer(terminalStateBuffer);
 				delete terminalStateBuffer;
 				terminalStateBuffer = nullptr;
 			}
@@ -146,7 +146,7 @@ int Shell::run(Vector<char*> args) {
 			Clock().schedule(0);
 		}
 		else {
-			Kernel::out->puts("Command invalid");
+			Kernel::out.puts("Command invalid");
 		}
 	}
 	return 0;
@@ -174,14 +174,14 @@ void Shell::runMemTest() {
 		*singleValue = 0;
 
 		uint64_t val = (uint64_t) array;
-		Kernel::out->puts("\n");
-		Kernel::out->putuint(val);
+		Kernel::out.puts("\n");
+		Kernel::out.putuint(val);
 		if (array == nullptr || array2 == nullptr || array3 == nullptr) {
-			Kernel::out->putsln("FAIL");
+			Kernel::out.putsln("FAIL");
 			return;
 		}
 	}
-	Kernel::out->putsln("\nSUCCESS");
+	Kernel::out.putsln("\nSUCCESS");
 }
 
 
@@ -189,41 +189,41 @@ void Shell::runMemTest() {
 void Shell::calc() {
 	char* tempBuffer = new char[15];
 
-	Kernel::in->getWord(tempBuffer, 15);
-	Kernel::out->putchar(' ');
+	Kernel::in.getWord(tempBuffer, 15);
+	Kernel::out.putchar(' ');
 	int64_t operand0 = string_to_int(tempBuffer, 10);
-	Kernel::in->getWord(tempBuffer, 2);
-	Kernel::out->putchar(' ');
+	Kernel::in.getWord(tempBuffer, 2);
+	Kernel::out.putchar(' ');
 	char sign = *tempBuffer;
-	Kernel::in->getWord(tempBuffer, 15);
-	Kernel::out->putchar(' ');
+	Kernel::in.getWord(tempBuffer, 15);
+	Kernel::out.putchar(' ');
 
 	int64_t operand1 = string_to_int(tempBuffer, 10);
 
-	Kernel::out->putchar('=');
+	Kernel::out.putchar('=');
 	switch (sign) {
 		case '+':
-			Kernel::out->putint(operand0 + operand1);
+			Kernel::out.putint(operand0 + operand1);
 			break;
 		case '-':
-			Kernel::out->putint(operand0 - operand1);
+			Kernel::out.putint(operand0 - operand1);
 			break;
 		case '*':
-			Kernel::out->putint(operand0 * operand1);
+			Kernel::out.putint(operand0 * operand1);
 			break;
 		case '/':
 			if(operand1) {
-				Kernel::out->putint(operand0 / operand1);
+				Kernel::out.putint(operand0 / operand1);
 			}
 			else {
-				Kernel::out->putchar('0');
+				Kernel::out.putchar('0');
 			}
 			break;
 		default:
-			Kernel::out->puts("Error: Undefined operation");
+			Kernel::out.puts("Error: Undefined operation");
 			break;
 	}
-	Kernel::out->newLine();
+	Kernel::out.newLine();
 
 	delete[] tempBuffer;
 }
@@ -232,12 +232,12 @@ void Shell::calc() {
 
 void Shell::setGMT() {
 	char* tempBuffer = new char[10];
-	Kernel::in->getWord(tempBuffer, 10);
+	Kernel::in.getWord(tempBuffer, 10);
 	int8_t gmt = (int8_t)string_to_int(tempBuffer, 10);
 	Time::setGMT(gmt);
 	delete[] tempBuffer;
-	Kernel::out->puts("GMT set to ");
-	Kernel::out->putint(Time::getGMT());
+	Kernel::out.puts("GMT set to ");
+	Kernel::out.putint(Time::getGMT());
 }
 
 
@@ -245,26 +245,26 @@ void Shell::setGMT() {
 void Shell::cowsay() {
 
 	char* tempBuffer = new char[64];
-	Kernel::in->gets(tempBuffer, 64);
+	Kernel::in.gets(tempBuffer, 64);
 
 	size_t length = strlen(tempBuffer);
-	Kernel::out->putchar(' ');
+	Kernel::out.putchar(' ');
 	for (size_t i = 0; i < length + 2; i++) {
-		Kernel::out->putchar('_');
+		Kernel::out.putchar('_');
 	}
-	Kernel::out->puts("\n< ");
-	Kernel::out->puts(tempBuffer);
-	Kernel::out->puts(">\n ");
+	Kernel::out.puts("\n< ");
+	Kernel::out.puts(tempBuffer);
+	Kernel::out.puts(">\n ");
 	for (size_t i = 0; i < length + 2; i++) {
-		Kernel::out->putchar('-');
+		Kernel::out.putchar('-');
 	}
 
-	Kernel::out->putchar('\n');
-	Kernel::out->puts("  \\ ^__^\n");
-	Kernel::out->puts("    (oo)\\_______\n");
-	Kernel::out->puts("    (__)\\       )\\/\\\n");
-	Kernel::out->puts("        ||----w |\n");
-	Kernel::out->puts("        ||     ||\n");
+	Kernel::out.putchar('\n');
+	Kernel::out.puts("  \\ ^__^\n");
+	Kernel::out.puts("    (oo)\\_______\n");
+	Kernel::out.puts("    (__)\\       )\\/\\\n");
+	Kernel::out.puts("        ||----w |\n");
+	Kernel::out.puts("        ||     ||\n");
 }
 
 
@@ -272,7 +272,7 @@ void Shell::cowsay() {
 void Shell::piano() {
 	const uint32_t notes[] = {261, 294, 330, 350, 392, 440, 494};
 	while (true) {
-		char c = Kernel::in->getchar_nolock();
+		char c = Kernel::in.getchar_nolock();
 		if (c > '0' && c <'8') {
 			Speaker::play(notes[c - '0'], 200);
 

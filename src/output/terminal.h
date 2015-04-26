@@ -69,8 +69,14 @@ public:
 	void putchar(char c);
 	void backspace();
 	void puts(const char* string);
+	void operator() (const char* string);
 	void putsln(const char* string);
 	void putint(int64_t value);
+	void operator() (int64_t value);
+	Terminal& operator<<(const char* string);
+	Terminal& operator<<(char ch);
+	Terminal& operator<<(int64_t value);
+	Terminal& operator<<(uint64_t value);
 	void putuint(uint64_t value);
 	void puthex(uint64_t value);
 	void putbytes(uint64_t value);
@@ -81,6 +87,7 @@ public:
 	void saveToBuffer(TerminalStateBuffer* buffer);
 	void setStatus(const char* status);
 	void getStatus(char* status);
+	int64_t getLocation();
 	~Terminal();
 
 private:

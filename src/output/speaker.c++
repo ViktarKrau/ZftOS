@@ -71,7 +71,7 @@ char Speaker::playWithKeyboardBlock(uint32_t frequency, uint64_t millisecTimeout
     turnOn();
     char c = 0;
     while (Time::getMilliseconds() < startTime + millisecTimeout
-            && (c = Kernel::in->getkey_nolock()) == 0) {
+            && (c = Kernel::in.getkey_nolock()) == 0) {
         halt();
     }
     turnOff();
@@ -87,7 +87,7 @@ char Speaker::playWithKeyboradBlock(uint32_t frequency) {
     setFrequency(frequency);
     turnOn();
     char c = 0;
-    while ((c = Kernel::in->getchar_nolock()) == 0) {
+    while ((c = Kernel::in.getchar_nolock()) == 0) {
         halt();
     }
     turnOff();

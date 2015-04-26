@@ -11,13 +11,14 @@
 
 class Scheduler{
 public:
+    Scheduler();
     void createTask(Executable* task);
     void removeTask(Executable* task);
     bool isPresent(Executable* task);
     void switchToNextTask();
     void passControl();
+    int64_t getLocation();
 private:
-
     friend void switchTasks();
     bool isControlPassed;
     Executable* getNextTask();

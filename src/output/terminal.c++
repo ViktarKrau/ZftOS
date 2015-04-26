@@ -288,3 +288,49 @@ void Terminal::getStatus(char *status) {
 		++status;
 	}
 }
+
+
+
+void Terminal::operator()(const char* string) {
+	puts(string);
+}
+
+
+
+void Terminal::operator()(int64_t value) {
+	putint(value);
+}
+
+
+
+Terminal& Terminal::operator<<(const char* string) {
+	puts(string);
+	return *this;
+}
+
+
+
+Terminal& Terminal::operator<<(char ch) {
+	putchar(ch);
+	return *this;
+}
+
+
+
+Terminal& Terminal::operator<<(int64_t value) {
+	putint(value);
+	return *this;
+}
+
+
+
+int64_t Terminal::getLocation() {
+	return (int64_t)this;
+}
+
+
+
+Terminal& Terminal::operator<<(uint64_t value) {
+	putuint(value);
+	return *this;
+}

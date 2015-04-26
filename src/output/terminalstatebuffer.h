@@ -10,7 +10,9 @@ class TerminalStateBuffer {
 public:
     TerminalStateBuffer();
     TerminalStateBuffer(Terminal* terminal);
+    TerminalStateBuffer(Terminal& terminal);
     void saveFrom(Terminal* terminal);
+    void saveFrom(Terminal& terminal);
     void loadTo(Terminal* terminal);
     void empty();
     ~TerminalStateBuffer();
