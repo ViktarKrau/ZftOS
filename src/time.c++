@@ -24,8 +24,11 @@
 #define RTC_YEARS_REGISTER 0x09
 /*5th bit set*/
 #define RTC_ENABLE_ALARM (0x01 << 5)
+#define RTC_ENABLE_PERIODIC_INTERRUPT (0x01 << 6)
 #define ALARM_TIMEOUT 5000
-
+#define CMOS_PERIODIC_NORMAL_MODE (0x01 << 5)
+/*1024 frequence, equal  976.5625 ms*/
+#define CMOS_PERIODIC_SET_FREQUENCE (0x6)
 
 
 char* Time::alarmMessageBuffer;
@@ -34,6 +37,7 @@ bool Time::doesAlarmBlock = true;
 bool Time::isClockFormatWrong;
 int8_t Time::GMT;
 volatile uint64_t Time::milliseconds;
+volatile double Time::cmosMilliseconds;
 
 
 void Time::initialize() {
@@ -423,4 +427,50 @@ uint8_t Time::getAlarmHour() {
 bool Time::isAlarmSet() {
     outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
     return (bool) (inb(CMOS_DATA_PORT) & RTC_ENABLE_ALARM);
+}
+
+
+
+void cmosTimerTick() {
+    Time::cmosMilliseconds += 0.9765625;
+}
+
+
+
+void Time::cmosDelay(uint64_t delayInMilliseconds) {
+    turnOnRTCPeriodicInterrupt();
+    cmosMilliseconds = 0.0;
+    while (delayInMilliseconds > cmosMilliseconds) {
+        halt();
+    }
+    turnOffRTCPeriodicInterrupt();
+
+}
+
+
+
+void Time::turnOnRTCPeriodicInterrupt() {
+    outb(CMOS_STATUS_PORT, RTC_A_REGISTER);
+    uint8_t aReg = inb(CMOS_DATA_PORT);
+    aReg = (uint8_t) ((aReg & UPDATE_IN_PROGRESS_FLAG)
+               | CMOS_PERIODIC_NORMAL_MODE | CMOS_PERIODIC_SET_FREQUENCE);
+    outb(CMOS_STATUS_PORT, RTC_A_REGISTER);
+    outb(CMOS_DATA_PORT, aReg);
+
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t bReg = inb(CMOS_DATA_PORT);
+    bReg |= RTC_ENABLE_PERIODIC_INTERRUPT;
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, bReg);
+}
+
+
+
+void Time::turnOffRTCPeriodicInterrupt() {
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    uint8_t bReg = inb(CMOS_DATA_PORT);
+    bReg = (uint8_t) ((bReg | RTC_ENABLE_PERIODIC_INTERRUPT)
+                      ^ RTC_ENABLE_PERIODIC_INTERRUPT);
+    outb(CMOS_STATUS_PORT, RTC_B_REGISTER);
+    outb(CMOS_DATA_PORT, bReg);
 }

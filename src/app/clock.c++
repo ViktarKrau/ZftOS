@@ -27,9 +27,10 @@ void Clock::mainMenu() {
                                   "\t\t2. Set time\n"
                                   "\t\t3. Set alarm\n"
                                   "\t\t4. Delay(ms)\n"
-                                  "\t\t5. View alarm time\n"
-                                  "\t\t6. Turn off alarm\n"
-                                  "\t\t7. Quit\n");
+                                  "\t\t5. CMOS delay(ms)\n"
+                                  "\t\t6. View alarm time\n"
+                                  "\t\t7. Turn off alarm\n"
+                                  "\t\t8. Quit\n");
         switch (Kernel::in.getchar()) {
             case '1':
                 printTime();
@@ -44,15 +45,18 @@ void Clock::mainMenu() {
                 runDelay();
                 break;
             case '5':
+                runCMOSDelay();
+                break;
+            case '6':
                 Kernel::out << "\n" << Time::getAlarmHour()
                 << ":" << Time::getAlarmMinute() << ":" << Time::getAlarmSecond();
                 Kernel::out << ((Time::isAlarmSet())? "\nalarm is set" : "alarm is not set");
                 break;
-            case '6':
+            case '7':
                 Kernel::out << "Alarm is not set now";
                 Time::turnOffAlarm();
                 break;
-            case '7':
+            case '8':
                 return;
             default:
                 Kernel::out.puts("Wrong key\n");
@@ -158,4 +162,18 @@ void Clock::setAlarm() {
     Kernel::out.putuint(Time::getAlarmMinute());
     Kernel::out.puts(":");
     Kernel::out.putuint(Time::getAlarmSecond());
+}
+
+
+
+void Clock::runCMOSDelay() {
+    uint64_t delayTime;
+    Kernel::out.puts("\nEnter time to delay in milliseconds: ");
+    delayTime = Kernel::in.getuint();
+    Kernel::out.puts("\nDelaying ");
+    Kernel::out.putuint(delayTime);
+    Kernel::out.puts(" milliseconds...");
+    Time::cmosDelay(delayTime);
+    Kernel::out.puts("\nDelay ended.");
+    Kernel::in.flush();
 }

@@ -19,6 +19,7 @@ struct IDTDescr{
 
 void timerTick();
 void timeAlarm();
+void cmosTimerTick();
 extern "C" void initialize_idt();
 extern "C" void keyboard_handler_c();
 extern "C" void unmask_interrupts();

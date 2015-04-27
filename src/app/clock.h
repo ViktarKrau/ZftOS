@@ -14,6 +14,7 @@ public:
 private:
     void mainMenu();
     void runDelay();
+    void runCMOSDelay();
     void setTime();
     void setAlarm();
     void safeRead(uint8_t& param, const char* enterInvite, const char* errorMessage

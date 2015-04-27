@@ -34,16 +34,20 @@ public:
     static void setGMT(int8_t value);
     friend void timerTick();
     friend void timeAlarm();
+    friend void cmosTimerTick();
     static uint64_t getMilliseconds();
     static void turnOffAlarm();
     static uint8_t getAlarmSecond();
     static uint8_t getAlarmMinute();
     static uint8_t getAlarmHour();
+    static void cmosDelay(uint64_t delayInMilliseconds);
     static bool isAlarmSet();
 private:
     static bool doesAlarmBlock;
     static char* alarmMessageBuffer;
     static void turnOnAlarm();
+    static void turnOnRTCPeriodicInterrupt();
+    static void turnOffRTCPeriodicInterrupt();
     static uint8_t convertHourToWrite(uint8_t hour);
     static uint8_t convertReadHour(uint8_t hour);
     static void setSecond(uint8_t second);
@@ -55,6 +59,7 @@ private:
     static void forbidUpdate();
     static void allowUpdate();
     static volatile uint64_t milliseconds;
+    static volatile double cmosMilliseconds;
     static int8_t GMT;
     static bool needConvert;
     static bool isClockFormatWrong;

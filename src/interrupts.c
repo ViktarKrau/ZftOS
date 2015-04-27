@@ -21,7 +21,8 @@
 #define ICW3_SLAVE_CONNECTED_TO_MASTER_2ND_LINE 0x02
 #define ICW4_86_MODE 0x01
 #define EOI	0x20
-#define WRITE_EOI() outb(PIC_MASTER_CONTROL_PORT, EOI)
+#define WRITE_MASTER_EOI() outb(PIC_MASTER_CONTROL_PORT, EOI)
+#define WRITE_SLAVE_EOI() outb(PIC_SLAVE_CONTROL_PORT, EOI)
 #define TIMER_CONTROL_PORT 0x43
 #define TIMER_ZERO_CHANNEL_SQUARE_WAVE_MODE_INITIALIZE 0x34
 #define TIMER_ZERO_CHANNEL_PORT 0x40
@@ -41,6 +42,11 @@
 #define GET_LOWER_BYTE(x) (x & 0xFF)
 #define GET_HIGHER_BYTE(x) ((x >> 8) & 0xFF)
 #define WORD_BITS_COUNT 16
+#define CMOS_STATUS_PORT 0x70
+#define CMOS_DATA_PORT 0x71
+#define RTC_C_REGISTER 0x0C
+#define CMOS_ALARM_INTERRUPT_BIT (0x01 << 5)
+#define CMOS_PERIODICAL_INTERRUPT_BIT (0x01 << 6)
 
 
 
@@ -50,9 +56,10 @@ struct IDTDescr IDT[IDT_SIZE];
 
 extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
-extern "C"  void cmos_alarm_handler();
+extern "C"  void cmos_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
 void switchTasks();
+
 
 
 extern "C"
@@ -66,17 +73,24 @@ void keyboard_handler_c() {
 		keycode = inb(KEYBOARD_DATA_PORT);
 		enter_queue_push(keycode);
 	}
-	WRITE_EOI();
+	WRITE_MASTER_EOI();
+	WRITE_SLAVE_EOI();
 }
 
 
 
 extern "C"
-void cmos_alarm_handler_c() {
-	WRITE_EOI();
-	timeAlarm();
-	outb(0x70, 0x0C);
-	inb(0x71);				// just throw away contents
+void cmos_handler_c() {
+	outb(CMOS_STATUS_PORT, RTC_C_REGISTER);
+	uint8_t interrupt_type = inb(CMOS_DATA_PORT);
+	if (interrupt_type & CMOS_ALARM_INTERRUPT_BIT) {
+		timeAlarm();
+	}
+	else if (interrupt_type & CMOS_PERIODICAL_INTERRUPT_BIT) {
+		cmosTimerTick();
+	}
+	WRITE_SLAVE_EOI();
+	WRITE_MASTER_EOI();
 }
 
 
@@ -84,7 +98,7 @@ void cmos_alarm_handler_c() {
 extern "C"
 void page_fault_handler() {
 	*(char*)(0xB8000) = 'A';
-	WRITE_EOI();
+	WRITE_MASTER_EOI();
 }
 
 
@@ -93,7 +107,7 @@ extern "C"
 void timer_handler_c() {
 	timerTick();
 	//switchTasks();
-	WRITE_EOI();
+	WRITE_MASTER_EOI();
 }
 
 
@@ -137,7 +151,7 @@ void initialize_idt() {
 	make_idt_entry(IDT + KEYBOARD_INTERRUPT_ENTRY_NUMBER, keyboard_handler, (uint16_t)__cs, INTERRUPT_GATE);
 	make_idt_entry(IDT + TIMER_INTERRUPT_ENTRY_NUMBER, timer_handler, (uint16_t)__cs, INTERRUPT_GATE);
 	make_idt_entry(IDT + PAGE_FAULT_INTERRUPT_ENTRY_NUMBER, page_fault_handler, (uint16_t)__cs, INTERRUPT_GATE);
-	make_idt_entry(IDT + CMOS_INTERRUPT_ENTRY_NUMBER, cmos_alarm_handler, (uint16_t)__cs, INTERRUPT_GATE);
+	make_idt_entry(IDT + CMOS_INTERRUPT_ENTRY_NUMBER, cmos_handler, (uint16_t)__cs, INTERRUPT_GATE);
 
 	idt_address = (uint32_t)&IDT;
 	idt_ptr[0] = (uint32_t) ((sizeof (struct IDTDescr) * IDT_SIZE)

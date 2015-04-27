@@ -22,12 +22,12 @@ get_eip:
 
 
 .section .text
-.global cmos_alarm_handler
-.type cmos_alarm_handler, @function
-cmos_alarm_handler:
-		call cmos_alarm_handler_c
+.global cmos_handler
+.type cmos_handler, @function
+cmos_handler:
+		call cmos_handler_c
 		iret
-.size cmos_alarm_handler, . - cmos_alarm_handler
+.size cmos_handler, . - cmos_handler
 
 .section .text
 .global keyboard_handler
