@@ -1,11 +1,18 @@
 #include "../zftdef.h"
 
+
+
+
 #ifndef ENTER_QUEUE_H
 #define ENTER_QUEUE_H
 
 #define ENTER_QUEUE_SIZE 0x400
 
+
+
 void enter_queue_push(uint8_t keycode);
+
+
 
 class EnterQueue
 {

@@ -72,7 +72,7 @@ Executable* Scheduler::getNextTask() {
 
 
 
-void switchTasks() {
+void switch_tasks_c() {
     if (!Kernel::scheduler.isControlPassed) {
         Kernel::scheduler.switchToNextTask();
     }

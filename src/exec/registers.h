@@ -7,12 +7,9 @@
 
 
 
-class Registers {
-public:
-    uint32_t eip;
-    uint32_t esp;
-    uint32_t ebp;
-};
+typedef struct {
+    uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
+} Registers;
 
 
 

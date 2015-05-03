@@ -2,14 +2,23 @@
 #include "../kernel.h"
 #include "../output/terminalstatebuffer.h"
 #include "../iob.h"
+#include "registers.h"
+#define DEFAULT_STACK_SIZE 0x1000
 
-
-Executable::Executable(bool _screenNeeded) {
+Executable::Executable(bool _screenNeeded/*, void(*main)()*/) {
     pid = 0;
     isNewScreenNeeded = _screenNeeded;
-    registers.ebp = 0;
-    registers.eip = 0;
-    registers.esp = 0;
+    registers.eax = 0;
+    registers.ebx = 0;
+    registers.ecx = 0;
+    registers.edx = 0;
+    registers.esi = 0;
+    registers.edi = 0;
+    registers.eflags = 0;
+    registers.eip = /*(uint32_t)main*/ 0;
+    //Page directory
+    registers.cr3 = 0;
+    registers.esp = (uint32_t) (new char[DEFAULT_STACK_SIZE] + DEFAULT_STACK_SIZE);
 }
 
 

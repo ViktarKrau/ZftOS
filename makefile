@@ -5,11 +5,15 @@ ASM = ./compiler/bin/i686-elf-as
 CFLAGS = -std=gnu99 -ffreestanding  -O2 -Wall -Wextra
 LFLAGS = -ffreestanding -O2 -nostdlib
 
+
+
 all: assembly cppcompile link
 
 
 
-assembly: 		boot idt
+assembly: 		boot idt tswitch
+tswitch:
+	$(ASM) src/exec/tswitch.s -o obj/exec/tswitch.o
 boot:
 	$(ASM) src/boot.s -o obj/boot.o
 idt:
@@ -18,12 +22,13 @@ idt:
 
 
 cppcompile: 	common input output memory_f exec app
-app: 				shell clock
+app: 				shell clock kbblink
 common: 			main interrupts kernel string time zft_memory
 output: 			speaker terminal terminalstatebuffer
 input: 				enterqueue inputstream
 memory_f: 			bitmap memory new paging
 exec: 				executable scheduler
+
 
 
 main:
@@ -64,7 +69,8 @@ scheduler:
 	$(GPP) -c src/exec/scheduler.c++ -o obj/exec/scheduler.o $(PFLAGS)
 clock:
 	$(GPP) -c src/app/clock.c++ -o obj/app/clock.o $(PFLAGS)
-
+kbblink:
+	$(GPP) -c src/app/kbblink.c++ -o obj/app/kbblink.o $(PFLAGS)
 
 
 link:
@@ -72,7 +78,8 @@ link:
 	  obj/boot.o obj/main.o obj/kernel.o obj/output/terminalstatebuffer.o obj/app/shell.o \
 	  obj/time.o obj/output/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o \
 	  obj/memory/memory.o obj/input/inputstream.o obj/input/enterqueue.o obj/app/clock.o \
-	  obj/memory/paging.o obj/idt.o obj/exec/executable.o obj/exec/scheduler.o obj/memory/bitmap.o -lgcc
+	  obj/memory/paging.o obj/idt.o obj/exec/executable.o obj/exec/scheduler.o \
+	  obj/memory/bitmap.o obj/app/kbblink.o obj/exec/tswitch.o -lgcc
 
 
 

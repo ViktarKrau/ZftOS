@@ -15,7 +15,7 @@ typedef uint32_t pid_t;
 
 class Executable {
 public:
-    Executable(bool _screenNeeded);
+    Executable(bool _screenNeeded/*, void(*main)()*/);
     virtual int schedule(Vector<char*> args) final;
     virtual int run(Vector<char*> args);
     virtual bool isActive() final;

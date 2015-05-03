@@ -58,7 +58,7 @@ extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
 extern "C"  void cmos_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
-void switchTasks();
+void switch_tasks_c();
 
 
 
@@ -190,5 +190,7 @@ void unmask_interrupts(){
 		 & UNMASK_KEYBOARD_INTERRUPT
 		 & UNMASK_TIMER_INTERRUPT
 		 & UNMASK_SLAVE_INTERRUPT);
-	outb(PIC_SLAVE_DATA_PORT, FULL_MASK & UNMASK_RTC_INTERRUPT);
+	outb(PIC_SLAVE_DATA_PORT,
+		 FULL_MASK
+		 & UNMASK_RTC_INTERRUPT);
 }

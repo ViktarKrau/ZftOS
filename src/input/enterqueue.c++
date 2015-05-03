@@ -1,4 +1,5 @@
 #include "enterqueue.h"
+#include "../kernel.h"
 
 #define RIGHT_SHIFT_PRESSED 0x36
 #define LEFT_SHIFT_PRESSED 0x2A
@@ -26,11 +27,13 @@ void EnterQueue::push(uint8_t keycode) {
 	if(isHandlerSet) {
 		return handler(keycode);
 	}
-	if (keycode == RIGHT_SHIFT_RELEASED || keycode == LEFT_SHIFT_RELEASED) {
+	if (keycode == RIGHT_SHIFT_RELEASED
+		|| keycode == LEFT_SHIFT_RELEASED) {
 		shiftHold = false;
 		return;
 	}
-	if (keycode == LEFT_SHIFT_PRESSED || keycode == RIGHT_SHIFT_PRESSED) {
+	if (keycode == LEFT_SHIFT_PRESSED
+		|| keycode == RIGHT_SHIFT_PRESSED) {
 		shiftHold = true;
 		return;
 	}

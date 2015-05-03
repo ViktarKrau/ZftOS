@@ -19,7 +19,7 @@ public:
     void passControl();
     int64_t getLocation();
 private:
-    friend void switchTasks();
+    friend void switch_tasks_c();
     bool isControlPassed;
     Executable* getNextTask();
     Executable* currentTask;

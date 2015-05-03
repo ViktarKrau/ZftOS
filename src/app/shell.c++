@@ -5,6 +5,7 @@
 #include "../output/terminalstatebuffer.h"
 #include "clock.h"
 #include "../interrupts.h"
+#include "kbblink.h"
 
 const char helptext[] = "\tZunft OS ver. 0.05\n"
 						"\tList of supported commands\n"
@@ -148,6 +149,9 @@ int Shell::run(Vector<char*> args) {
 		}
 		else if (!strcmp(buff, "alarm")) {
 			Kernel::out.alarm("ALARM", 0);
+		}
+		else if (!strcmp(buff, "kb")) {
+			KbBlink().schedule(0);
 		}
 		else {
 			Kernel::out.puts("Command invalid");

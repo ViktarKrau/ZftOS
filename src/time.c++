@@ -452,8 +452,10 @@ void Time::cmosDelay(uint64_t delayInMilliseconds) {
 void Time::turnOnRTCPeriodicInterrupt() {
     outb(CMOS_STATUS_PORT, RTC_A_REGISTER);
     uint8_t aReg = inb(CMOS_DATA_PORT);
-    aReg = (uint8_t) ((aReg & UPDATE_IN_PROGRESS_FLAG)
-               | CMOS_PERIODIC_NORMAL_MODE | CMOS_PERIODIC_SET_FREQUENCE);
+    aReg = (uint8_t) ((aReg
+                       & UPDATE_IN_PROGRESS_FLAG)
+               | CMOS_PERIODIC_NORMAL_MODE
+               | CMOS_PERIODIC_SET_FREQUENCE);
     outb(CMOS_STATUS_PORT, RTC_A_REGISTER);
     outb(CMOS_DATA_PORT, aReg);
 
