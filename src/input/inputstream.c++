@@ -32,8 +32,16 @@ char InputStream::getchar() {
 		if (code < 0) {
 			continue;
 		}
-		if ((code != 29 && code != 42 && code != 54 && code < 56 && code > 1)
-				|| code == 57 || code == 74 || code == 78) {
+		if (kbmap[code] == '\n'
+			|| kbmap[code] == '\t'
+			|| kbmap[code] == '\b'
+			|| (kbmap[code] >= '1' && kbmap[code] <= '9')
+				|| kbmap[code] == ' ') {
+			return kbmap[code];
+		}
+		if (/*(code != 29 && code != 42 && code != 54 && code < 56 && code > 1)
+				|| code == 57 || code == 74 || code == 78*/
+				(kbmap[code] >= 'a' && kbmap[code] <= 'z')) {
 			if (EnterQueue::isShiftHold()) {
 				return kbmap[code] - 'a' + 'A';
 			}

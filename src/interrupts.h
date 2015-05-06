@@ -20,6 +20,7 @@ struct IDTDescr{
 void timerTick();
 void timeAlarm();
 void cmosTimerTick();
+void enter_queue_push(uint8_t keycode);
 extern "C" void initialize_idt();
 extern "C" void keyboard_handler_c();
 extern "C" void unmask_interrupts();

@@ -4,13 +4,13 @@
 
 
 
+extern "C" void switch_tasks(Registers* from, Registers* to);
+
+
+
 void Scheduler::createTask(Executable* task) {
     disable_interrupts();
-
     uint32_t i = 0;
-
-
-
     for ( ; i < tasks.size(); ++i) {
         if (tasks[i] == nullptr) {
             tasks[i] = task;
@@ -53,8 +53,7 @@ void Scheduler::switchToNextTask() {
     if (task == currentTask) {
         return;
     }
-    currentTask->saveContext();
-    task->loadContext();
+    switch_tasks(&currentTask->registers, &task->registers);
     currentTask = task;
 }
 

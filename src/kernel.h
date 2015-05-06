@@ -2,7 +2,6 @@
 #include "zftdef.h"
 #include "zft_memory.h"
 #include "output/terminal.h"
-#include "input/enterqueue.h"
 #include "input/inputstream.h"
 #include "exec/scheduler.h"
 

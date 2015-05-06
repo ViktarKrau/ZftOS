@@ -23,8 +23,6 @@ public:
     virtual pid_t getPid();
 private:
     friend class Scheduler;
-    void saveContext();
-    void loadContext();
     Registers registers;
     pid_t pid;
     bool active;

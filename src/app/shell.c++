@@ -7,7 +7,9 @@
 #include "../interrupts.h"
 #include "kbblink.h"
 
-const char helptext[] = "\tZunft OS ver. 0.05\n"
+
+
+const char helptext[] = "\tZunft OS ver. 0.7\n"
 						"\tList of supported commands\n"
 						"\t\thelp  --  views this message\n"
 						"\t\texit  --  power off\n"
@@ -15,8 +17,10 @@ const char helptext[] = "\tZunft OS ver. 0.05\n"
 						"\t\tcolor -- change output color\n"
 						"\t\tcowsay ... -- cow says what you want it to\n"
 						"\t\ttime -- get current time printed\n"
-						"\t\talloctest -- run test of allocation manager\n"
+						"\t\tclock -- launch clock setting application\n"
+						"\t\tkb -- launch keyboard blink app\n"
 						"\t\tbeep -- play default melody using system speaker\n"
+						"\t\tpiano -- play on keyboard like on piano\n"
 						"\t\tcalc -- calculate something\n"
 						"\t\tsetgmt -- setting current gmt";
 
@@ -88,7 +92,7 @@ void Shell::printTime() {
 
 int Shell::run(Vector<char*> args) {
 	Kernel::out.clear();
-	Kernel::out.putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS ver 0.5 SHELL!"
+	Kernel::out.putsln("\t\t\t\t\t\tWELCOME TO ZUNFT OS ver 0.7 SHELL!"
 						"\nType \"help\" to get list of available commands");
 	printArgs(args);
 	TerminalStateBuffer* terminalStateBuffer = nullptr;
@@ -157,7 +161,6 @@ int Shell::run(Vector<char*> args) {
 			Kernel::out.puts("Command invalid");
 		}
 	}
-	return 0;
 }
 
 

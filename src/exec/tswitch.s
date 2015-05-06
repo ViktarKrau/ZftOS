@@ -6,7 +6,7 @@ switch_tasks:
     pushf
     mov %cr3, %eax                  #Push CR3
     push %eax
-    mov 44(%esp), %eax
+    mov 44(%esp), %eax              #FUNCTION PARAM Register* To
     mov %ebx, 4(%eax)
     mov %ecx, 8(%eax)
     mov %edx, 12(%eax)
@@ -24,7 +24,7 @@ switch_tasks:
     mov %ecx, 32(%eax)
     mov %edi, 36(%eax)
     pop %ebx                        #CR3
-    mov %ebx, 40(%eax)
+    mov %ebx, 40(%eax)              #FUNCTION PARAM Register* From
     push %ebx                       #
     mov 48(%esp), %eax              #Now it is the new object
     mov 4(%eax), %ebx               #EBX

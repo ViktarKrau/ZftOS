@@ -1,7 +1,6 @@
 #include "zftdef.h"
 #include "interrupts.h"
 #include "iob.h"
-#include "input/enterqueue.h"
 
 
 
@@ -39,6 +38,7 @@
 #define GET_LOWER_WORD(x) (x & 0xFFFF)
 #define GET_HIGHER_WORD(x) ((x & 0xffff0000) >> 16)
 #define IS_LOWEST_BIT_SET(x) (x & 0x1)
+#define KEYBOARD_READ_BUFFER_NOT_EMPTY_BIT 0x01
 #define GET_LOWER_BYTE(x) (x & 0xFF)
 #define GET_HIGHER_BYTE(x) ((x >> 8) & 0xFF)
 #define WORD_BITS_COUNT 16
@@ -69,7 +69,7 @@ void keyboard_handler_c() {
 
 	status = inb(KEYBOARD_STATUS_PORT);
 	/* Lowest bit of status will be set if buffer is not empty */
-	if (IS_LOWEST_BIT_SET(status)) {
+	if (status & KEYBOARD_READ_BUFFER_NOT_EMPTY_BIT) {
 		keycode = inb(KEYBOARD_DATA_PORT);
 		enter_queue_push(keycode);
 	}
