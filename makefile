@@ -22,7 +22,7 @@ idt:
 
 
 cppcompile: 	common input output memory_f exec app
-app: 				shell clock kbblink
+app: 				shell clock kbblink taskingtest
 common: 			main interrupts kernel string time zft_memory
 output: 			speaker terminal terminalstatebuffer
 input: 				enterqueue inputstream
@@ -71,10 +71,12 @@ clock:
 	$(GPP) -c src/app/clock.c++ -o obj/app/clock.o $(PFLAGS)
 kbblink:
 	$(GPP) -c src/app/kbblink.c++ -o obj/app/kbblink.o $(PFLAGS)
-
+taskingtest:
+	$(GPP) -c src/app/taskingtest.c++ -o obj/app/taskingtest.o $(PFLAGS)
 
 link:
-	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) obj/output/speaker.o obj/memory/new.o \
+	$(GPP) -T src/linker.ld -o bin/zftos.bin $(LFLAGS) \
+	  obj/output/speaker.o obj/memory/new.o obj/app/taskingtest.o \
 	  obj/boot.o obj/main.o obj/kernel.o obj/output/terminalstatebuffer.o obj/app/shell.o \
 	  obj/time.o obj/output/terminal.o obj/zft_memory.o obj/string.o obj/interrupts.o \
 	  obj/memory/memory.o obj/input/inputstream.o obj/input/enterqueue.o obj/app/clock.o \

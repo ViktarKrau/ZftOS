@@ -78,6 +78,7 @@ public:
 	Terminal& operator<<(int64_t value);
 	Terminal& operator<<(uint64_t value);
 	Terminal& operator<<(uint8_t value);
+	Terminal& operator<<(uint32_t value);
 	void putuint(uint64_t value);
 	void puthex(uint64_t value);
 	void putbytes(uint64_t value);

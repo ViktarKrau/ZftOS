@@ -21,6 +21,7 @@ static __inline uint8_t inb(uint16_t port) {
 
 
 
+
 static __inline void halt() {
 	__asm__ ("hlt");
 }
@@ -37,6 +38,12 @@ static __inline void disable_interrupts() {
 	__asm__ ("cli");
 }
 
+
+
+static __inline void dead_halt() {
+	disable_interrupts();
+	halt();
+}
 
 
 #endif

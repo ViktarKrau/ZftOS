@@ -361,3 +361,9 @@ void Terminal::alarm(const char* message, uint64_t millisecTimeout) {
 Terminal& Terminal::operator<<(uint8_t value) {
 	return *this << (uint64_t)value;
 }
+
+
+
+Terminal& Terminal::operator<<(uint32_t value) {
+	return *this << (uint64_t)value;
+}

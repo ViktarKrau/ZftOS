@@ -12,7 +12,7 @@
 
 
 
-class Kernel{
+class Kernel : public Executable{
 public:
 	Kernel(multiboot_info_t* info);
 	void run();

@@ -7,9 +7,21 @@
 
 
 
+Vector<char*>* Executable::nextStartupArgs;
+Executable* Executable::nextStartupTask;
+
+
 /*Function, address of is in eip, when task is runned*/
-void executableEntryPoint(Vector<char*> args, Executable* executable) {
-    executable->run(args);
+void executableEntryPoint() {
+    Executable* task = Executable::nextStartupTask;
+    task->active = true;
+    Vector<char*> args = *Executable::nextStartupArgs;
+    Kernel::scheduler.switchToPrevious();
+    task->run(args);
+    task->active = false;
+    delete[] (char*)task->initialStackStart;
+    Kernel::scheduler.removeTask(task);
+    Kernel::scheduler.switchToNext();
 }
 
 
@@ -23,13 +35,13 @@ Executable::Executable(bool _screenNeeded) {
     registers.edx = 0;
     registers.esi = 0;
     registers.edi = 0;
-    registers.eflags = 0;
+    //Getting eflags for this task, which are same as eflags of caller task
+    asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0;"
+            " popfl;":"=m"(registers.eflags)::"%eax");
     registers.eip = (uint32_t)executableEntryPoint;
     //Page directory
-    registers.cr3 = 0;
-    registers.esp = (uint32_t) (new char[DEFAULT_STACK_SIZE] + DEFAULT_STACK_SIZE);
-    registers.esp -= sizeof this;
-    *(Executable**)registers.esp = this;
+    asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(registers.cr3)::"%eax");
+    /*pushing arguments of executableEntryPoint into stack*/
 }
 
 
@@ -49,32 +61,18 @@ bool Executable::isActive() {
 
 
 
-int Executable::schedule(Vector<char*> args) {
-    registers.esp -= sizeof args;
-    *(Vector<char*>*)registers.esp = args;
-
+int Executable::scheduleAbove(Vector<char*> args) {
     char* previousStatus = new char[81];
-
     Kernel::out.getStatus(previousStatus);
     TerminalStateBuffer* buffer = nullptr;
-
     if (isNewScreenNeeded) {
         buffer = new TerminalStateBuffer();
         Kernel::out.saveToBuffer(buffer);
 
     }
-    Kernel::out.putsln("\nSEND TO SCHEDULER TO CREATE TASK");
-    Kernel::scheduler.createTask(this);
-    Kernel::out.putsln("TASK CREATED");
-    active = true;
-    Kernel::out << "CALLED RUN\n";
-    /*TODO: REMOVE*/
     int retval = run(args);
-    active = false;
-    //Kernel::scheduler->removeTask(this);
     if (buffer != nullptr) {
         Kernel::out.restoreFromBuffer(buffer);
-
     }
     Kernel::out.setStatus(previousStatus);
     delete previousStatus;
@@ -96,3 +94,12 @@ pid_t Executable::getPid() {
 }
 
 
+
+int Executable::schedule(Vector<char*> args) {
+    initialStackStart = (uint32_t) (new char[DEFAULT_STACK_SIZE]);
+    registers.esp = initialStackStart + DEFAULT_STACK_SIZE;
+    *nextStartupArgs = args;
+    nextStartupTask = this;
+    Kernel::scheduler.createTask(this);
+    return 0;
+}

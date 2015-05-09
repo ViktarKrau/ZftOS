@@ -3,7 +3,6 @@
 #include "../vector.h"
 
 
-
 #ifndef ZFTOS_DEV_SCHEDULER_H
 #define ZFTOS_DEV_SCHEDULER_H
 
@@ -11,11 +10,13 @@
 
 class Scheduler{
 public:
-    Scheduler();
+    Scheduler(Executable* initialTask);
     void createTask(Executable* task);
     void removeTask(Executable* task);
+    bool switchTo(Executable* task);
+    bool switchToPrevious();
     bool isPresent(Executable* task);
-    void switchToNextTask();
+    void switchToNext();
     void passControl();
     int64_t getLocation();
 private:

@@ -33,6 +33,7 @@ public:
 
     T& operator[](unsigned int index);
     Vector<T>& operator=(const Vector<T>&);
+    void rawCopy(Vector<T>&);
     void clear();
 private:
     unsigned int _size;
@@ -246,10 +247,16 @@ void Vector<T>::clear() {
 
 template <class T>
 bool Vector<T>::empty() const {
-    if (size() == 0) {
-        return true;
-    }
-    return false;
+    return size() == 0;
+}
+
+
+
+template <class T>
+void Vector<T>::rawCopy(Vector& vector) {
+    buffer = vector.buffer;
+    _size = vector._size;
+    _capacity = vector._capacity;
 }
 
 

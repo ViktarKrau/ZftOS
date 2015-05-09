@@ -22,10 +22,10 @@ Scheduler& Kernel::scheduler = *((Scheduler*)(SCHEDULER_START_ADDRESS));
 
 
 
-Kernel::Kernel(multiboot_info_t* info) {
+Kernel::Kernel(multiboot_info_t* info) : Executable(false) {
 	__out = new ((void*)__out) Terminal(TerminalColor::COLOR_RED, TerminalColor::COLOR_LIGHT_GREY);
 	__in = new ((void*)__in) InputStream();
-	__scheduler = new ((void*)__scheduler) Scheduler();
+	__scheduler = new ((void*)__scheduler) Scheduler(this);
 
 
 	memoryUpper = info->mem_upper;
@@ -75,12 +75,12 @@ void Kernel::exit(ExitType type) {
 void Kernel::run() {
 	out.puts("RUNNING SHELL");
 	Shell shell;
-	shell.schedule(0);
+	shell.scheduleAbove(0);
 	out.putsln("\n\n\nSHELL EXITED\n\n\n");
 }
 
 
 
 void Kernel::initializeTasking(uint32_t stack) {
-
+	Executable::nextStartupArgs = new Vector<char*>;
 }

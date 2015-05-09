@@ -1,7 +1,7 @@
 #include "scheduler.h"
 #include "../iob.h"
 #include "../kernel.h"
-
+#include "../app/shell.h"
 
 
 extern "C" void switch_tasks(Registers* from, Registers* to);
@@ -9,6 +9,7 @@ extern "C" void switch_tasks(Registers* from, Registers* to);
 
 
 void Scheduler::createTask(Executable* task) {
+
     disable_interrupts();
     uint32_t i = 0;
     for ( ; i < tasks.size(); ++i) {
@@ -21,7 +22,7 @@ void Scheduler::createTask(Executable* task) {
         task->pid = tasks.size();
         tasks.push_back(task);
     }
-    //switchToNextTask();
+    //switchToNext();
     enable_interrupts();
 }
 
@@ -36,25 +37,24 @@ void Scheduler::removeTask(Executable* task) {
         Kernel::out.puts("ERROR");
         return;
     }
-    switchToNextTask();
+    switchToNext();
     enable_interrupts();
 }
 
 
 
-bool Scheduler::isPresent(Executable *task) {
-    return tasks.contains(task);
+bool Scheduler::isPresent(Executable* task) {
+    return task != nullptr && tasks[task->getPid()] == task;
 }
 
 
 
-void Scheduler::switchToNextTask() {
+void Scheduler::switchToNext() {
     Executable* task = getNextTask();
     if (task == currentTask) {
         return;
     }
-    switch_tasks(&currentTask->registers, &task->registers);
-    currentTask = task;
+    switchTo(task);
 }
 
 
@@ -73,7 +73,7 @@ Executable* Scheduler::getNextTask() {
 
 void switch_tasks_c() {
     if (!Kernel::scheduler.isControlPassed) {
-        Kernel::scheduler.switchToNextTask();
+        Kernel::scheduler.switchToNext();
     }
     else {
         Kernel::scheduler.isControlPassed = false;
@@ -83,13 +83,15 @@ void switch_tasks_c() {
 
 
 void Scheduler::passControl() {
-    switchToNextTask();
     isControlPassed = true;
+    switchToNext();
 }
 
 
 
-Scheduler::Scheduler() {
+Scheduler::Scheduler(Executable* initialTask) : tasks(1, initialTask) {
+    //Initial task
+    currentTask = initialTask;
 }
 
 
@@ -97,3 +99,46 @@ Scheduler::Scheduler() {
 int64_t Scheduler::getLocation() {
     return (int64_t)this;
 }
+
+
+
+bool Scheduler::switchTo(Executable* task) {
+    if (isPresent(task)) {
+        //Can't switch directly to new task, because currentTask variable
+        //must be reassigned before actual task switch
+        Executable* previous = currentTask;
+        currentTask = task;
+        switch_tasks(&previous->registers, &task->registers);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
+
+bool Scheduler::switchToPrevious() {
+    uint32_t currentPid = currentTask->getPid();
+    uint32_t previousPid;
+    if (currentPid == 0) {
+        previousPid = tasks.size();
+    }
+    else {
+        previousPid = currentPid - 1;
+    }
+    while (tasks[previousPid] == nullptr) {
+        if (previousPid == currentPid) {
+            return false;
+        }
+        if (previousPid != 0) {
+            --previousPid;
+        }
+        else {
+            previousPid = tasks.size() - 1;
+        }
+    }
+    switchTo(tasks[previousPid]);
+    return true;
+}
+

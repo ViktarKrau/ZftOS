@@ -6,10 +6,11 @@
 #include "clock.h"
 #include "../interrupts.h"
 #include "kbblink.h"
-
+#include "taskingtest.h"
 
 
 const char helptext[] = "\tZunft OS ver. 0.7\n"
+						"\tDeveloped by Kravchenko Viktor. Minsk, 2015\n"
 						"\tList of supported commands\n"
 						"\t\thelp  --  views this message\n"
 						"\t\texit  --  power off\n"
@@ -149,13 +150,16 @@ int Shell::run(Vector<char*> args) {
 			piano();
 		}
 		else if (!strcmp(buff, "clock")) {
-			Clock().schedule(0);
+			Clock().scheduleAbove(0);
 		}
 		else if (!strcmp(buff, "alarm")) {
 			Kernel::out.alarm("ALARM", 0);
 		}
 		else if (!strcmp(buff, "kb")) {
-			KbBlink().schedule(0);
+			KbBlink().scheduleAbove(0);
+		}
+		else if (!strcmp(buff, "ttest")) {
+			TaskingTest().scheduleAbove(0);
 		}
 		else {
 			Kernel::out.puts("Command invalid");
@@ -187,10 +191,10 @@ void Shell::runMemTest() {
 		uint64_t val = (uint64_t) array;
 		Kernel::out.puts("\n");
 		Kernel::out.putuint(val);
-		if (array == nullptr || array2 == nullptr || array3 == nullptr) {
+		/*if (array == nullptr || array2 == nullptr || array3 == nullptr) {
 			Kernel::out.putsln("FAIL");
 			return;
-		}
+		}*/
 	}
 	Kernel::out.putsln("\nSUCCESS");
 }
