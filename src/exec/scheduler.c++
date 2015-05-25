@@ -5,25 +5,25 @@
 
 
 extern "C" void switch_tasks(Registers* from, Registers* to);
-
+extern "C" Registers* next_task_registers_ptr;
+extern "C" Registers* previous_task_registers_ptr;
 
 
 void Scheduler::createTask(Executable* task) {
 
     disable_interrupts();
-    uint32_t i = 0;
-    for ( ; i < tasks.size(); ++i) {
+    for (uint32_t i = 0; i < tasks.size(); ++i) {
         if (tasks[i] == nullptr) {
             tasks[i] = task;
             task->pid = (pid_t) i;
+            enable_interrupts();
+            return;
         }
     }
-    if (i == tasks.size()) {
-        task->pid = tasks.size();
-        tasks.push_back(task);
-    }
-    //switchToNext();
+    task->pid = tasks.size();
+    tasks.push_back(task);
     enable_interrupts();
+    //switchToNext();
 }
 
 
@@ -60,20 +60,28 @@ void Scheduler::switchToNext() {
 
 
 Executable* Scheduler::getNextTask() {
-    uint32_t position = currentTask->getPid() + 1;
-    while (position < tasks.size()) {
-        if (tasks[position] != nullptr) {
-            return tasks[position];
+    uint32_t startPid = currentTask->getPid();
+    uint32_t nextPid = startPid + 1;
+    while (nextPid != startPid) {
+        if (nextPid > tasks.size()) {
+            nextPid = 0;
+            continue;
+        }
+        if (tasks[nextPid] != nullptr) {
+            return tasks[nextPid];
+        }
+        else {
+            nextPid++;
         }
     }
-    return tasks[0];
+    return currentTask;
 }
 
 
 
-void switch_tasks_c() {
+void switchTasks() {
     if (!Kernel::scheduler.isControlPassed) {
-        Kernel::scheduler.switchToNext();
+        Kernel::scheduler.switchToNextLater();
     }
     else {
         Kernel::scheduler.isControlPassed = false;
@@ -89,8 +97,8 @@ void Scheduler::passControl() {
 
 
 
-Scheduler::Scheduler(Executable* initialTask) : tasks(1, initialTask) {
-    //Initial task
+Scheduler::Scheduler(Executable* initialTask) : tasks(0) {
+    createTask(initialTask);
     currentTask = initialTask;
 }
 
@@ -142,3 +150,36 @@ bool Scheduler::switchToPrevious() {
     return true;
 }
 
+
+
+void Scheduler::switchToNextLater() {
+    Executable* next = getNextTask();
+
+    if (next == currentTask || next == nullptr) {
+        //No, we don't need switch
+        next_task_registers_ptr = nullptr;
+        return;
+    }
+    else {
+        /*Kernel::out << (uint32_t)next << " ";
+        Kernel::out << (uint32_t)currentTask;
+        Kernel::out << "\n" << "TASKS SIZE: " << (uint32_t)tasks.size() << "\n";
+        showTaskInfo();*/
+        //dead_halt();
+        Kernel::out << (uint32_t)next << " " << (uint32_t)currentTask;
+        //dead_halt();
+        next_task_registers_ptr = &next->registers;
+        previous_task_registers_ptr = &currentTask->registers;
+        currentTask = next;
+        return;
+    }
+
+}
+
+
+
+void Scheduler::showTaskInfo() {
+    for (size_t i = 0; i < tasks.size(); ++i) {
+        Kernel::out << (uint32_t)tasks[i] << "\n";
+    }
+}

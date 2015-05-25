@@ -7,6 +7,7 @@
 #include "../interrupts.h"
 #include "kbblink.h"
 #include "taskingtest.h"
+#include "displayclock.h"
 
 
 const char helptext[] = "\tZunft OS ver. 0.7\n"
@@ -100,66 +101,74 @@ int Shell::run(Vector<char*> args) {
 
 	printTime();
 	Kernel::out.setStatus("\t\t\t\t\t\t\tSHELL");
-
-	while (true) {
+    /*DisplayClock displayClock;
+    char buffer[25];
+    strcpy(buffer, "ARG");
+    args.push_back(buffer);
+    displayClock.schedule(args);
+	*/
+    while (true) {
 		getCommand();
-		if (!strcmp(buff, "help")) {
+		if (!strcmpic(buff, "help")) {
 			Kernel::out.putsln(helptext);
 		}
-		else if (!strcmp(buff, "exit")) {
+		else if (!strcmpic(buff, "exit")) {
 			Kernel::exit(Kernel::SHUTDOWN);
 		}
-		else if (!strcmp(buff, "reboot")) {
+		else if (!strcmpic(buff, "reboot")) {
 			Kernel::exit(Kernel::REBOOT);
 		}
-		else if (!strcmp(buff, "color")) {
+		else if (!strcmpic(buff, "color")) {
 			Kernel::out.setColor((ColorByte) (Kernel::out.getColor() + 1));
 			Kernel::out.redraw();
 		}
-		else if (!strcmp(buff, "time")) {
+		else if (!strcmpic(buff, "time")) {
 			Kernel::out.putchar('\n');
 			printTime();
 			Kernel::out.putchar('\n');
 		}
-		else if (!strcmp(buff, "alloctest")) {
+		else if (!strcmpic(buff, "alloctest")) {
 			runMemTest();
 		}
-		else if (!strcmp(buff, "setgmt")) {
+		else if (!strcmpic(buff, "setgmt")) {
 			setGMT();
 		}
-		else if (!strcmp(buff, "beep")) {
+		else if (!strcmpic(buff, "beep")) {
 			Speaker::playDefaultMelody();
 		}
-		else if (!strcmp(buff, "calc")) {
+		else if (!strcmpic(buff, "calc")) {
 			calc();
 		}
-		else if (!strcmp(buff, "cowsay")) {
+		else if (!strcmpic(buff, "cowsay")) {
 			cowsay();
 		}
-		else if (!strcmp(buff, "save")) {
+		else if (!strcmpic(buff, "save")) {
 			terminalStateBuffer = new TerminalStateBuffer(Kernel::out);
 		}
-		else if (!strcmp(buff, "load")) {
+		else if (!strcmpic(buff, "load")) {
 			if (terminalStateBuffer != nullptr) {
 				Kernel::out.restoreFromBuffer(terminalStateBuffer);
 				delete terminalStateBuffer;
 				terminalStateBuffer = nullptr;
 			}
 		}
-		else if (!strcmp(buff, "piano")) {
+		else if (!strcmpic(buff, "piano")) {
 			piano();
 		}
-		else if (!strcmp(buff, "clock")) {
+		else if (!strcmpic(buff, "clock")) {
 			Clock().scheduleAbove(0);
 		}
-		else if (!strcmp(buff, "alarm")) {
+		else if (!strcmpic(buff, "alarm")) {
 			Kernel::out.alarm("ALARM", 0);
 		}
-		else if (!strcmp(buff, "kb")) {
+		else if (!strcmpic(buff, "kb")) {
 			KbBlink().scheduleAbove(0);
 		}
-		else if (!strcmp(buff, "ttest")) {
+		else if (!strcmpic(buff, "ttest")) {
 			TaskingTest().scheduleAbove(0);
+		}
+		else if (!strcmpic(buff, "pi")) {
+			Kernel::scheduler.showTaskInfo();
 		}
 		else {
 			Kernel::out.puts("Command invalid");

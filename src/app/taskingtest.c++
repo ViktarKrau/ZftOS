@@ -18,17 +18,17 @@ int TaskingTest::run(Vector<char*> args) {
         another->schedule(nargs);
         for (uint32_t i = 0; i < 10; ++i) {
             Kernel::out << " A ";
-            bool success = Kernel::scheduler.switchTo(another);
+            /*bool success = Kernel::scheduler.switchTo(another);
             if (!success) {
                 Kernel::out << "ERROR";
                 return -1;
-            }
+            }*/
         }
     }
     else {
         for (uint32_t i = 0; i < 10; ++i) {
             Kernel::out << " B ";
-            Kernel::scheduler.switchToNext();
+            /*Kernel::scheduler.switchToNext();*/
         }
     }
     return 0;

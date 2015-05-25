@@ -58,7 +58,7 @@ extern "C"	void timer_handler();
 extern "C"  void keyboard_handler();
 extern "C"  void cmos_handler();
 extern "C"  void load_idt(uint32_t ptrs[2]);
-void switch_tasks_c();
+void switchTasks();
 
 
 

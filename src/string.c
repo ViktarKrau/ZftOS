@@ -32,7 +32,23 @@ uint8_t strcmp(const char* string_a, const char* string_b){
 
 
 
-char* strcpy(char* destination, const char* source){
+int8_t strcmpic(const char* string_a, const char* string_b) {
+    size_t i;
+    for (i = 0; string_a[i] != '\0' && string_b[i] != '\0'; ++i) {
+        if (string_a[i] != string_b[i]) {
+            if ((string_a[i] >= 'a' && string_a[i] <= 'z' && string_a[i] - 'a' + 'A' == string_b[i])
+                    || (string_b[i] >= 'a' && string_b[i] <= 'z' && string_b[i] - 'a' + 'A' == string_a[i])) {
+                continue;
+            }
+            break;
+        }
+    }
+    return (int8_t) (string_b[i] - string_a[i]);
+}
+
+
+
+char* strcpy(char* destination, const char* source) {
 	memcpy((void*)destination, (const void*)source, strlen(source));
 	return destination;
 }

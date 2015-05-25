@@ -7,12 +7,12 @@
 
 
 
-class DisplayClock : Executable {
+class DisplayClock : public Executable {
 public:
     DisplayClock();
     virtual int run(Vector<char*> args) override;
 private:
-    void putTimeEntity(uint8_t entity, char divider, uint32_t startPosition);
+    void putTimeEntity(uint8_t entity, char splitSymbol, uint32_t startPosition);
     void putTimeChar(char timeChar, size_t x);
 };
 

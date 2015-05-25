@@ -18,9 +18,11 @@ public:
     bool isPresent(Executable* task);
     void switchToNext();
     void passControl();
+    void showTaskInfo();
     int64_t getLocation();
 private:
-    friend void switch_tasks_c();
+    friend void switchTasks();
+    void switchToNextLater();
     bool isControlPassed;
     Executable* getNextTask();
     Executable* currentTask;

@@ -2,6 +2,7 @@
 
 char* strcpy(char* destination, const char* source);
 uint8_t strcmp(const char* string_a, const char* string_b);
+int8_t strcmpic(const char* string_a, const char* string_b);
 size_t strlen(const char* string);
 BOOL is_empty(const char* string);
 //char* sprintf(char* destination, const char* format, ...);
